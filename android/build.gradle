@@ -1,0 +1,56 @@
+buildscript {
+    ext.kotlin_version = '1.8.0' // استخدم إصدارًا متوافقًا
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+
+        classpath "com.android.tools.build:gradle:8.7.0"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+plugins {
+    id("com.android.application")
+    id("com.google.gms.google-services")
+    id 'com.android.application' version '8.7.0' apply false
+    id 'com.android.library' version '8.7.0' apply false
+    id 'org.jetbrains.kotlin.android' version '1.8.0' apply false
+    id("com.google.gms.google-services") version "4.4.2" apply false
+}
+
+dependencies {
+    implementation 'org.codehaus.groovy:groovy:3.0.20' // استخدم الإصدار المناسب
+    implementation 'org.codehaus.groovy:groovy-ant:3.0.20'
+    implementation 'org.codehaus.groovy:groovy-astbuilder:3.0.20'
+    implementation 'org.codehaus.groovy:groovy-console:3.0.20'
+    implementation 'org.codehaus.groovy:groovy-datetime:3.0.20'
+    implementation 'org.codehaus.groovy:groovy-dateutil:3.0.20'
+    implementation 'org.codehaus.groovy:groovy-nio:3.0.20'
+    implementation 'org.codehaus.groovy:groovy-sql:3.0.20'
+    implementation 'org.codehaus.groovy:groovy-test:3.0.20'
+    implementation 'org.codehaus.groovy:groovy-templates:3.0.20'
+    implementation 'org.codehaus.groovy:groovy-json:3.0.20'
+    implementation 'org.codehaus.groovy:groovy-xml:3.0.20'
+    implementation 'org.codehaus.groovy:groovy-groovydoc:3.0.20'
+    implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
+    implementation("com.google.firebase:firebase-analytics")
+}
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
