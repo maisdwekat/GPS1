@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 import 'AuthController.dart';
 
 class IdeaController {
-  final String baseUrl = "http://172.23.14.245:4000/api/v1/idea";
+  final String baseUrl = "http://192.168.1.25:4000/api/v1/idea";
 
 
   Future<String?> _getToken() async {
@@ -265,17 +266,20 @@ class IdeaController {
     }
     return null;
   }
-
   // الحصول على جميع الأفكار للمستخدم
-  Future<List<dynamic>?> getAllIdeasForUser(String userId) async {
-    final savedToken = await _getToken();
+  Future<List<Map<String, dynamic>>?> getAllForUser() async {
+    print("getAllForUser() called");
+    final savedToken = await _getToken(); // تأكد من وجود دالة _getToken
     if (savedToken == null || savedToken.isEmpty) {
       print("Error: Token is null or empty");
-      return null; // Or handle the error as needed
+      return null;
     }
+    Map<String, dynamic> decodedToken = JwtDecoder.decode(savedToken);
+    print("Decoded Token: $decodedToken");
+    String userId = decodedToken['id'];
+    print("User ID: $userId");
     String tokenWithPrefix = 'token__$savedToken';
-    print("token: ${tokenWithPrefix}");
-
+    print("Token: $tokenWithPrefix");
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/getAllForUser/$userId'),
@@ -284,20 +288,28 @@ class IdeaController {
           'token': tokenWithPrefix,
         },
       );
-
+      print("Sent Request");
       print('Response Status Code: ${response.statusCode}');
       print('Response Body: ${response.body}');
-
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-        return responseData['ideas'] ?? []; // Assuming the response contains a key 'ideas'
+        List<Map<String, dynamic>> ideas = (responseData['getIdeas'] as List)
+            .map((idea) => {
+          'category': idea['category'],
+          'description': idea['description'],
+          'isPublic': idea['isPublic'],
+        })
+            .toList();
+        print('Successfully fetched ideas: ${responseData['ideas']}'); // طباعة الأفكار المسترجعة
+        print('Successfully fetched ideas: $ideas');
+        return ideas; // Assuming the response contains a key 'ideas'
       } else {
-        print('Failed to fetch ideas: ${response.statusCode}');
-        return null; // Or handle the error as needed
+        print('Failed to fetch ideas: ${response.statusCode}'); // طباعة رسالة عند الفشل
+        return null; // أو معالجة الخطأ حسب الحاجة
       }
     } catch (error) {
-      print('Error: $error');
-      return null; // Or handle the error as needed
+      print('Error: $error'); // طباعة أي خطأ قد يحدث
+      return null; // أو معالجة الخطأ حسب الحاجة
     }
   }
 

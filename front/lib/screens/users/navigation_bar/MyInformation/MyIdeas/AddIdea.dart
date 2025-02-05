@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../../../../Controllers/ideaController.dart';
 import '../../../../../constants.dart';
-import 'MyIdeas.dart';
 
 class AddideaScreen extends StatefulWidget {
   @override
@@ -12,7 +11,6 @@ class AddideaScreen extends StatefulWidget {
 class _AddideaScreenState extends State<AddideaScreen> {
 
   final TextEditingController descriptionController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
   String selectedCategory = '';
   bool isPublic = false;
 
@@ -87,8 +85,6 @@ class _AddideaScreenState extends State<AddideaScreen> {
                 SizedBox(height: 10),
                 Text('ما هو مجال الفكرة', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold)),
                 _buildDropdownField(),
-                SizedBox(height: 10),
-                _buildLabeledTextField('الإيميل', emailController),
                 SizedBox(height: 20),
                 _buildVisibilityDropdown(),
                 SizedBox(height: 20),
@@ -99,10 +95,7 @@ class _AddideaScreenState extends State<AddideaScreen> {
                       width: 150,
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => MyIdeasScreen()),
-                          );
+                          Navigator.pop(context); // العودة للصفحة السابقة
                         },
                         child: Text('إلغاء'),
                       ),
@@ -112,6 +105,8 @@ class _AddideaScreenState extends State<AddideaScreen> {
                       child: ElevatedButton(
                         onPressed:() {
                           addIdea();
+                          Navigator.pop(context); // العودة للصفحة السابقة
+
                         },
                         child: Text('حفظ '),
                       ),
@@ -262,7 +257,6 @@ class _AddideaScreenState extends State<AddideaScreen> {
   @override
   void dispose() {
     descriptionController.dispose();
-    emailController.dispose();
     super.dispose();
   }
 }

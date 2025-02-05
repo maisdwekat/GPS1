@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ggg_hhh/constants.dart';
+import 'package:ggg_hhh/screens/Login/components/Otp_Verification_Screen.dart';
+import 'package:ggg_hhh/screens/Login/components/forgot_password.dart';
 import 'package:ggg_hhh/screens/Signup/signup_screen.dart';
 import 'package:ggg_hhh/screens/Welcome/welcome_screen.dart';
 import 'package:ggg_hhh/screens/dashboard/Dashboard.dart';

@@ -26,7 +26,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _fetchUserData() async {
     final response = await http.get(
-      Uri.parse('https://your-backend-url.com/api/user/profile'),
+      Uri.parse('http://192.168.1.25:4000/api/v1/auth/signup'),
     );
 
     if (response.statusCode == 200) {

@@ -6,11 +6,10 @@ import 'Reset_Password_Screen.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String email;
-
   const OtpVerificationScreen({super.key, required this.email});
-
   @override
   _OtpVerificationScreenState createState() => _OtpVerificationScreenState();
+
 }
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
@@ -23,63 +22,38 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   }
 
   void verifyOtp(BuildContext context) async {
-    var body = {
-      "email": widget.email.trim(),
-      "code": _otpController.text.trim()
-    };
-
-    try {
-      var response = await http.post(
-        Uri.parse('http://localhost:3000/api/password-reset/verify'),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(body),
-      );
-
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('الرمز صحيح')),
-        );
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ResetPasswordScreen(email: widget.email),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('خطأ: ${response.body}')),
-        );
-      }
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('فشل الاتصال بالخادم: $error')),
-      );
-    }
+    var code = _otpController.text.trim();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ResetPasswordScreen(email:widget.email,code:code),
+      ),
+    );
   }
 
   void resendCode(BuildContext context) async {
-    var regBody = {"email": widget.email.trim()};
-    try {
-      var response = await http.post(
-        Uri.parse('http://localhost:3000/api/password-reset/request'),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(regBody),
-      );
-
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('تم إرسال الرمز إلى بريدك الإلكتروني')),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('خطأ: ${response.body}')),
-        );
-      }
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('فشل الاتصال بالخادم: $error')),
-      );
-    }
+    // var regBody = {"email": widget.email.trim()};
+    // try {
+    //   var response = await http.post(
+    //     Uri.parse('http://localhost:3000/api/password-reset/request'),
+    //     headers: {"Content-Type": "application/json"},
+    //     body: jsonEncode(regBody),
+    //   );
+    //
+    //   if (response.statusCode == 200) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(content: Text('تم إرسال الرمز إلى بريدك الإلكتروني')),
+    //     );
+    //   } else {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(content: Text('خطأ: ${response.body}')),
+    //     );
+    //   }
+    // } catch (error) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(content: Text('فشل الاتصال بالخادم: $error')),
+    //   );
+    // }
   }
 
   @override

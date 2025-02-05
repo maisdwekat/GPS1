@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 
 class AuthController {
-  final String baseUrl = "http://172.23.14.245:4000/api/v1/auth";
+  final String baseUrl = "http://192.168.1.25:4000/api/v1/auth";
 
    Future<Map<String, dynamic>> signup( String name, String email,String password,String phoneNumber,String gender, String role) async {
     final url = Uri.parse('$baseUrl/signup');

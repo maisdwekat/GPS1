@@ -36,6 +36,7 @@ class BMCformscreen extends StatelessWidget {
             Expanded(
               child: Center(
                 child: BusinessModelCanvas(),
+
               ),
             ),
             Padding(

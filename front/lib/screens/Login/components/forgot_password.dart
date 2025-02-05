@@ -4,6 +4,8 @@ import '../../../constants.dart';
 import 'Otp_Verification_Screen.dart'; // تأكد من استيراد الشاشة الصحيحة
 import 'package:http/http.dart' as http;
 
+import 'Reset_Password_Screen.dart';
+
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
 
@@ -13,12 +15,6 @@ class ForgotPasswordScreen extends StatefulWidget {
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final TextEditingController _emailController = TextEditingController();
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    super.dispose();
-  }
 
   void _showSuccessDialog(BuildContext context, String email) {
     showDialog(
@@ -45,7 +41,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => OtpVerificationScreen(email: email),
+                    builder: (context) => OtpVerificationScreen(email:email),
                   ),
                 );
               },
@@ -62,13 +58,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   void sendCode(BuildContext context) async {
     var email = _emailController.text.trim();
+    print("$email");
+
     var regBody = {"email": email};
     try {
-      var response = await http.post(
-        Uri.parse('http://localhost:3000/api/password-reset/request'),
+      var response = await http.patch(
+        Uri.parse('http://172.23.26.79:4000/api/v1/auth/sendcode'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(regBody),
       );
+      print("Request Sent..\n");
 
       if (response.statusCode == 200) {
         _showSuccessDialog(context, email);

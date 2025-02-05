@@ -1,19 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http; // استيراد حزمة http
+import '../../../../../Controllers/BMCcontroller.dart';
 import '../../../../../constants.dart';
 import 'BMCform.dart';
 
 class CreateBusinessPlanScreen extends StatelessWidget {
-  final TextEditingController _customersController = TextEditingController();
-  final TextEditingController _valuePropositionController = TextEditingController();
-  final TextEditingController _distributionChannelsController = TextEditingController();
+  final TextEditingController _customerSegmentsController = TextEditingController();
+  final TextEditingController _valuePropositionsController = TextEditingController();
+  final TextEditingController _channelsController = TextEditingController();
   final TextEditingController _customerRelationshipsController = TextEditingController();
   final TextEditingController _revenueStreamsController = TextEditingController();
   final TextEditingController _keyResourcesController = TextEditingController();
   final TextEditingController _keyActivitiesController = TextEditingController();
   final TextEditingController _keyPartnersController = TextEditingController();
   final TextEditingController _costStructureController = TextEditingController();
+  final BMCcontroller bmcController = BMCcontroller(); // إنشاء كائن من BMCcontroller
+
+  CreateBusinessPlanScreen({super.key});
+
+  Future<void> _saveBusinessCanva() async {
+    print('بدء عملية حفظ البيانات...'); // رسالة بداية العملية
+
+    print('البيانات المرسلة:');
+    print('Key Partners: ${_keyPartnersController.text}');
+    print('Key Activities: ${_keyActivitiesController.text}');
+    print('Key Resources: ${_keyResourcesController.text}');
+    print('Value Propositions: ${_valuePropositionsController.text}');
+    print('Customer Relationships: ${_customerRelationshipsController.text}');
+    print('Channels: ${_channelsController.text}');
+    print('Customer Segments: ${_customerSegmentsController.text}');
+    print('Cost Structure: ${_costStructureController.text}');
+    print('Revenue Streams: ${_revenueStreamsController.text}');
+
+    await bmcController.addBusinessCanva(
+      keyPartners: _keyPartnersController.text,
+      keyActivities: _keyActivitiesController.text,
+      keyResources: _keyResourcesController.text,
+      valuePropositions: _valuePropositionsController.text,
+      customerRelationships: _customerRelationshipsController.text,
+      channels: _channelsController.text,
+      customerSegments: _customerSegmentsController.text,
+      costStructure: _costStructureController.text,
+      revenueStreams: _revenueStreamsController.text,
+    );
+
+    print('تم حفظ البيانات بنجاح!'); // رسالة نجاح
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,9 +79,9 @@ class CreateBusinessPlanScreen extends StatelessWidget {
                   textAlign: TextAlign.right,
                 ),
                 SizedBox(height: 16),
-                _buildQuestionField(context, question: 'العملاء المستهدفون: من هم العملاء الذين تستهدفهم الشركة؟', controller: _customersController),
-                _buildQuestionField(context, question: 'قيمة العرض: ما هي المنتجات أو الخدمات التي تقدمها الشركة وما القيمة التي تقدمها للعملاء؟', controller: _valuePropositionController),
-                _buildQuestionField(context, question: 'قنوات التوزيع: كيف سيتم توصيل المنتجات أو الخدمات للعملاء؟', controller: _distributionChannelsController),
+                _buildQuestionField(context, question: 'العملاء المستهدفون: من هم العملاء الذين تستهدفهم الشركة؟', controller: _customerSegmentsController),
+                _buildQuestionField(context, question: 'قيمة العرض: ما هي المنتجات أو الخدمات التي تقدمها الشركة وما القيمة التي تقدمها للعملاء؟', controller: _valuePropositionsController),
+                _buildQuestionField(context, question: 'قنوات التوزيع: كيف سيتم توصيل المنتجات أو الخدمات للعملاء؟', controller: _channelsController),
                 _buildQuestionField(context, question: 'علاقات العملاء: كيف ستتفاعل الشركة مع عملائها وتبني علاقات معهم؟', controller: _customerRelationshipsController),
                 _buildQuestionField(context, question: 'مصادر الإيرادات: كيف ستكسب الشركة المال؟ (مثل المبيعات، الاشتراكات، الإعلانات)', controller: _revenueStreamsController),
                 _buildQuestionField(context, question: 'الموارد الرئيسية: ما هي الموارد الأساسية التي تحتاجها الشركة لتحقيق نموذج عملها؟', controller: _keyResourcesController),
@@ -163,8 +196,8 @@ class CreateBusinessPlanScreen extends StatelessWidget {
       ),
       child: TextButton(
         onPressed: () {
-          // استدعاء دالة إرسال البيانات هنا
-          sendDataToBackend();
+          print('زر الحفظ تم الضغط عليه!'); // طباعة رسالة عند الضغط على الزر
+          _saveBusinessCanva();
         },
         child: Text(
           'حفظ',
@@ -177,27 +210,4 @@ class CreateBusinessPlanScreen extends StatelessWidget {
     );
   }
 
-  Future<void> sendDataToBackend() async {
-    final response = await http.post(
-      Uri.parse('YOUR_BACKEND_URL'),
-      body: {
-        'customers': _customersController.text,
-        'valueProposition': _valuePropositionController.text,
-        'distributionChannels': _distributionChannelsController.text,
-        'customerRelationships': _customerRelationshipsController.text,
-        'revenueStreams': _revenueStreamsController.text,
-        'keyResources': _keyResourcesController.text,
-        'keyActivities': _keyActivitiesController.text,
-        'keyPartners': _keyPartnersController.text,
-        'costStructure': _costStructureController.text,
-      },
-    );
-
-    if (response.statusCode == 200) {
-      print('تم إرسال البيانات بنجاح!');
-      // يمكنك إضافة منطق لتوجيه المستخدم إلى شاشة أخرى إذا لزم الأمر
-    } else {
-      print('فشل في إرسال البيانات: ${response.statusCode}');
-    }
-  }
 }

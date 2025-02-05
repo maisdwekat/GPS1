@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'dart:io' show File;
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart'; // Import for image picking
 import 'package:http/http.dart' as http; // Import for HTTP requests
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:get/get.dart'; // Import GetX
+import 'package:intl/intl.dart';
 import '../../../../../Controllers/ProjectController.dart';
 import '../../../../../constants.dart';
 import 'CreateBusinessPlan.dart'; // تأكد من استيراد الصفحة التالية
@@ -23,9 +26,8 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
   final TextEditingController _websiteController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   String? creationDate; // لتخزين تاريخ الإنشاء (يمكن أن يكون نصًا)
-
-  final ImagePicker _picker = ImagePicker();
-  String? imagePath; // تأكد من أن لديك قيمة لمتغير imagePath
+  String? isoDate;  // لتخزين التاريخ بالتنسيق المطلوب
+  DateTime dateTime = DateTime.now();
   final TextEditingController _shortDescriptionController = TextEditingController();
   final TextEditingController _summaryController = TextEditingController();
   int shortDescriptionLength = 0;
@@ -49,6 +51,8 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
       });
     });
   }
+  final ImagePicker _picker = ImagePicker();
+  String? imagePath; // تأكد من أن لديك قيمة لمتغير imagePath
 
   Future<void> _pickImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -60,29 +64,15 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
     }
   }
 
-
-
-
   Future<void> sendDataToBackend() async {
-    String token = projectController.savedToken ?? ''; // احصل على التوكن المحفوظ
-
-    print('البيانات المرسلة:');
-    print('اسم المشروع: ${_projectNameController.text}');
-    print('الوصف: ${_shortDescriptionController.text}');
-    print('المرحلة الحالية: $selectedStage');
-    print('الرؤية: ${selectedVisibility == true ? 'عام' : 'خاص'}');
-    print('المدينة: $selectedCity');
-    print('مجال المشروع: $selectedProjectField');
-    print('الموقع الإلكتروني: ${_websiteController.text}');
-    print('الإيميل: ${_emailController.text}');
-    print('الملخص: ${_summaryController.text}');
-    print('تاريخ الإنشاء: $creationDate');
-    print('مسار الصورة: $imagePath');
-    print('التوكن: $token');
-
+    ProjectController projectController =ProjectController();
     try {
-      // إنشاء كائن MultipartRequest
-      var request = http.MultipartRequest('POST', Uri.parse('${projectController.baseUrl}/add'));      // إضافة الحقول إلى الطلب
+      String? tokenValue = await projectController.getToken();
+      var request = http.MultipartRequest('POST', Uri.parse('${projectController.baseUrl}/add'));
+      request.headers.addAll({
+        'token': 'token__$tokenValue',
+      });
+
       request.fields['title'] = _projectNameController.text;
       request.fields['description'] = _shortDescriptionController.text;
       request.fields['current_stage'] = selectedStage ?? '';
@@ -94,39 +84,79 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
       request.fields['summary'] = _summaryController.text;
       request.fields['date'] = creationDate ?? '';
 
-      // إضافة الصورة إذا كانت موجودة
-      if (imagePath != null) {
-        if (kIsWeb) {
-          // For web, you need to use a different approach
-          request.files.add(http.MultipartFile.fromBytes(
-            'image',
-            await File(imagePath!).readAsBytes(),
-            filename: imagePath!.split('/').last, // Get the file name
-          ));
-        } else {
-          // For mobile or desktop
-          var imageFile = await http.MultipartFile.fromPath('image', imagePath!);
-          request.files.add(imageFile);
-        }
-      }
 
-      // إضافة التوكن إلى الرأس
-      request.headers['Authorization'] = 'Bearer $token';
+      print('اسم المشروع: ${_projectNameController.text}');
+      print('الوصف: ${_shortDescriptionController.text}');
+      print('المرحلة الحالية: $selectedStage');
+      print('الرؤية: ${selectedVisibility}');
+      print('المدينة: $selectedCity');
+      print('مجال المشروع: $selectedProjectField');
+      print('الموقع الإلكتروني: ${_websiteController.text}');
+      print('الإيميل: ${_emailController.text}');
+      print('الملخص: ${_summaryController.text}');
+      print('تاريخ الإنشاء: $creationDate');
+      print('مسار الصورة: $imagePath');
+      print('التوكن: $tokenValue');
+
+      if (imagePath != null) {
+        var imageFile = File(imagePath!); // تحويل المسار إلى كائن ملف
+        var multipartFile = await http.MultipartFile.fromPath(
+          'image', // نفس اسم المفتاح المطلوب في الباك
+          imageFile.path,
+        );
+        request.files.add(multipartFile);
+        // إذا كانت الصورة موجودة
+        // var imageFile = File(imagePath!);
+        // var imageStream = http.ByteStream(imageFile.openRead());
+        // var imageLength = await imageFile.length();
+        //
+        // var multipartFile = http.MultipartFile(
+        //   'image', // نفس اسم المفتاح الذي يحتاجه الـ backend
+        //   imageStream,
+        //   imageLength,
+        //   filename: imageFile.path.split('/').last,
+        // );
+        //
+        // request.files.add(multipartFile);
+      } else {
+        print('الصورة غير موجودة');
+      }
 
       // إرسال الطلب
       final response = await request.send();
+      final responseBody = await response.stream.bytesToString(); // تحويل الاستجابة إلى نص
+      final responseData = json.decode(responseBody); // تحويل النص إلى JSON
 
-      if (response.statusCode == 200) {
+      print("Response Status Code: ${response.statusCode}");
+      print("Response Body: $responseData");
+
+      if (response.statusCode == 200 && responseData['message'] == "تمت الاضافة بنجاخ") {
         print('تم إرسال البيانات بنجاح!');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => CreateBusinessPlanScreen()),
         );
       } else {
-        print('فشل في إرسال البيانات: ${response.reasonPhrase}');
+        print('فشل في إرسال البيانات: ${responseData['message'] ?? response.reasonPhrase}');
+        Fluttertoast.showToast(
+          msg: "فشل في إرسال البيانات: ${responseData['message'] ?? 'خطأ غير معروف'}",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
       }
     } catch (e) {
       print('حدث خطأ: $e');
+      Fluttertoast.showToast(
+        msg: "حدث خطأ أثناء الإرسال: $e",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
     }
   }
 
@@ -191,6 +221,7 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
                 _buildLabeledTextField('الإيميل', controller: _emailController, maxLines: 1),
                 SizedBox(height: 20),
                 Text('أضف صورة لمشروعك', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold)),
+                Image.asset("assets/images/defaultpfp.jpg"),
                 SizedBox(height: 10),
                 _buildImageUploadField(),
                 SizedBox(height: 30),
@@ -229,7 +260,7 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
                           sendDataToBackend(); // استدعاء دالة إرسال البيانات
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => CreateBusinessPlanScreen()), // الانتقال إلى صفحة خطة العمل
+                            MaterialPageRoute(builder: (context) => CreateBusinessPlanScreen()), // الانتقال إلى صفحة BMC
                           );
                         },
                         child: Text('التالي'),
@@ -431,10 +462,17 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
             onChanged: (value) {
               // Validate if the input is in the format YYYY-MM-DD
               RegExp regExp = RegExp(r'^\d{4}-\d{2}-\d{2}$');
-              if (regExp.hasMatch(value)) {
+              if (value.isNotEmpty && regExp.hasMatch(value)) {
                 setState(() {
                   creationDate = value; // Store the valid date
                 });
+                print('تم اختيار تاريخ صالح: $creationDate');
+                // DateTime dateTime = DateFormat('yyyy-MM-dd').parse(value);
+                // String isoDate = dateTime.toUtc().toIso8601String();
+                // dateTime = DateTime.parse(value);  // تحديث dateTime بالقيمة المدخلة
+                // isoDate = dateTime.toUtc().toIso8601String().replaceAll('Z', '+00:00');
+                // print('تم اختيار تاريخ صالح: $isoDate');
+
               } else {
                 // Optionally show an error message or handle invalid input
                 print('Invalid date format. Please use YYYY-MM-DD.');
@@ -470,21 +508,33 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
             size: 50,
           ),
         )
-            : kIsWeb
-            ? Image.network(
-          imagePath!, // استخدم مسار الصورة المناسب أو رابط الصورة
-          fit: BoxFit.cover,
-        )
             : ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Image.file(
-            File(imagePath!),
-            fit: BoxFit.cover,
-          ),
+          // child: kIsWeb
+          //     ? FutureBuilder<Uint8List>(
+          //   future: _convertFileToBytes(imagePath!),
+          //   builder: (context, snapshot) {
+          //     if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+          //       return Image.memory(snapshot.data!, fit: BoxFit.cover);
+          //     } else {
+          //       return Center(child: CircularProgressIndicator());
+          //     }
+          //   },
+          // )
+          //     : Image.file(
+          //   File(imagePath!),
+          //   fit: BoxFit.cover,
+          // ),
         ),
       ),
     );
   }
+
+// دالة لتحويل الملف إلى Uint8List لعرضه في الويب
+//   Future<Uint8List> _convertFileToBytes(String path) async {
+//     File file = File(path);
+//     return await file.readAsBytes();
+//   }
 
   Widget _buildVisibilityDropdown() {
     return Column(

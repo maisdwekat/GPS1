@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:ggg_hhh/screens/users/homepageUsers/HomePageScreenUsers.dart';
+import '../../../components/already_have_an_account_acheck.dart';
 import '../../../constants.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String email;
-  const ResetPasswordScreen({super.key,required this.email});
-
+  final String code;
+  ResetPasswordScreen({required this.email, required this.code});
   @override
   _ResetPasswordScreenState createState() => _ResetPasswordScreenState();
 }
@@ -126,18 +127,24 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     }
 
     var body = {
-      "email": widget.email, // يجب استبداله بالبريد الإلكتروني الفعلي للمستخدم
-      "newPassword": newPassword
+      "code": widget.code,
+      "email": widget.email,
+      "newPassword":newPassword
+
     };
 
     try {
-      var response = await http.post(
-        Uri.parse('http://localhost:3000/api/password-reset/update'),
+      var response = await http.patch(
+        Uri.parse('http://172.23.26.79:4000/api/v1/auth/forgetpassword'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(body),
       );
+      print("Req Sent");
 
       if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم تغيير كلمة السر ')),
+        );
         _showSuccessDialog(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -183,7 +190,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 Navigator.of(context).pop();
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => const homepagescreen()),
+                  MaterialPageRoute(builder: (context) =>LoginForm()),
                 );
               },
               child: const Text("حسناً"),
