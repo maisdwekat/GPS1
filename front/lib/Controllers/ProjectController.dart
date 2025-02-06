@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'AuthController.dart';
 
 class ProjectController extends GetxController {
-  final String baseUrl = "http://192.168.1.25:4000/api/v1/project";
+  final String baseUrl = "http://172.29.32.1:4000/api/v1/project";
   Future<String?> getToken() async {
     AuthController authController = AuthController();
     String? savedToken = await authController.getToken();

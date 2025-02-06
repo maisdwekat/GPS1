@@ -135,7 +135,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
     try {
       var response = await http.patch(
-        Uri.parse('http://172.23.26.79:4000/api/v1/auth/forgetpassword'),
+        Uri.parse('http://172.29.32.1:4000/api/v1/auth/forgetpassword'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(body),
       );
@@ -187,7 +187,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 backgroundColor: Colors.white,
               ),
               onPressed: () {
-                Navigator.of(context).pop();
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) =>LoginForm()),

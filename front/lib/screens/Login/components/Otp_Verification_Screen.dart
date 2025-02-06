@@ -30,30 +30,72 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       ),
     );
   }
+  void _showSuccessDialog(BuildContext context, String email) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xE2122088),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check_circle, color: Colors.white, size: 48),
+              SizedBox(height: 16),
+              Text(
+                "لقد تم ارسال الرمز الى بريدك بنجاح تحقق منه",
+                style: TextStyle(color: Colors.white, fontSize: 18),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => OtpVerificationScreen(email:email),
+                  ),
+                );
+              },
+              child: const Text(
+                "حسناً",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   void resendCode(BuildContext context) async {
     // var regBody = {"email": widget.email.trim()};
-    // try {
-    //   var response = await http.post(
-    //     Uri.parse('http://localhost:3000/api/password-reset/request'),
-    //     headers: {"Content-Type": "application/json"},
-    //     body: jsonEncode(regBody),
-    //   );
-    //
-    //   if (response.statusCode == 200) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(content: Text('تم إرسال الرمز إلى بريدك الإلكتروني')),
-    //     );
-    //   } else {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       SnackBar(content: Text('خطأ: ${response.body}')),
-    //     );
-    //   }
-    // } catch (error) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(content: Text('فشل الاتصال بالخادم: $error')),
-    //   );
-    // }
+    var email = widget.email.trim();
+    print("$email");
+
+    var regBody = {"email": email};
+    try {
+      var response = await http.patch(
+        Uri.parse('http://192.168.1.19:4000/api/v1/auth/sendcode'),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(regBody),
+      );
+      print("Request Sent..\n");
+
+      if (response.statusCode == 200) {
+        _showSuccessDialog(context, email);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${response.body}')),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to connect to server: $error')),
+      );
+    }
   }
 
   @override

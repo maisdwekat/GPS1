@@ -63,7 +63,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     var regBody = {"email": email};
     try {
       var response = await http.patch(
-        Uri.parse('http://172.23.26.79:4000/api/v1/auth/sendcode'),
+
+        Uri.parse('http://172.29.32.1:4000/api/v1/auth/sendcode'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(regBody),
       );

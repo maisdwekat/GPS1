@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
+import '../../../../../Controllers/ideaController.dart';
 import '../../../../../constants.dart';
 import '../../../../ChatForInquiries/ChatForInquiries.dart';
 import '../MyAccount.dart';
@@ -11,9 +12,86 @@ import '../MyStartupProjects/MyStartupProjects.dart';
 class PreviewIdeaScreen extends StatefulWidget {
   @override
   _PreviewIdeaScreenState createState() => _PreviewIdeaScreenState();
+  final String ideaId;
+  const PreviewIdeaScreen({super.key, required this.ideaId});
+
 }
 
 class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
+  final IdeaController _ideaController = IdeaController();
+  @override
+  void initState() {
+    super.initState();
+    ideaGet(); // جلب الأفكار عند بدء الشاشة
+
+  }
+  String? _id;
+  String? _description;
+  String? _emailContact;
+  bool? _isPublic;
+  String? _category;
+  Map<String, dynamic>? _createdBy;
+  List<Map<String, dynamic>> _comment = [];
+  List<Map<String, dynamic>> _likes = [];
+  String? _createdAt;
+  Future<void> ideaGet() async {
+    print("ideaGet() called");
+    final ideas = await _ideaController.getIdea(widget.ideaId);
+
+    if (ideas != null && ideas.isNotEmpty) {
+      setState(() {
+        // تخزين القيم القادمة من getIdea
+        _id = ideas[0]['_id'];
+        _description = ideas[0]['description'];
+        _emailContact = ideas[0]['emailContact'];
+        _isPublic = ideas[0]['isPublic'];
+        _category = ideas[0]['category'];
+        _createdBy = ideas[0]['createdBy'];
+        _comment = List<Map<String, dynamic>>.from(ideas[0]['comments']);
+        _likes = List<Map<String, dynamic>>.from(ideas[0]['likes']);
+        _createdAt = ideas[0]['createdAt'];
+      });
+      print('Successfully fetched idea: $_description');
+      print('Idea ID: $_id');
+      print('Description: $_description');
+      print('Email Contact: $_emailContact');
+      print('Is Public: $_isPublic');
+      print('Category: $_category');
+      print('Created By: ${_createdBy?['name']}');
+      print('Created By ID: ${_createdBy?['_id']}');
+      print('Created At: $_createdAt');
+
+// طباعة التعليقات (comments)
+      print('Comments:');
+      _comment.forEach((comment) {
+        print('Comment ID: ${comment['_id']}');
+        print('Comment Content: ${comment['content']}');
+        print('Comment Created By: ${comment['userName']}');
+        print('Comment Created At: ${comment['createdAt']}');
+
+        // طباعة اللايكات الخاصة بالتعليق
+        if (comment['likes'] != null && comment['likes'].isNotEmpty) {
+          comment['likes'].forEach((like) {
+            print('Like ID: ${like['_id']}');
+            print('Like Created At: ${like['createdAt']}');
+          });
+        } else {
+          print('No likes for this comment');
+        }
+      });
+
+// طباعة اللايكات (likes) العامة للفكرة
+      print('Likes:');
+      _likes.forEach((like) {
+        print('Like ID: ${like['_id']}');
+        print('Like Created By: ${like['createdBy']}');
+        print('Like Created At: ${like['createdAt']}');
+      });
+
+    } else {
+      print('No idea data found');
+    }
+  }
 
   final List<Map<String, dynamic>> _comments = [
     {
@@ -33,11 +111,6 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
     'isLiked': false,
   };
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isHoveringAbout = false;
   bool _isHoveringComments = false;
@@ -52,6 +125,7 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
   String _profileImage = ''; // متغير لتخزين مسار الصورة
   String _displayedText = ''; // المتغير لتخزين النص المعروض
   String? _displayedImagePath; // المتغير لتخزين مسار الصورة المعروضة
+
 
   Future<void> _pickImage() async {
     final ImagePicker _picker = ImagePicker();

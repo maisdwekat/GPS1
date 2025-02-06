@@ -6,7 +6,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'AuthController.dart';
 
 class IdeaController {
-  final String baseUrl = "http://192.168.1.25:4000/api/v1/idea";
+  final String baseUrl = "http://172.29.32.1:4000/api/v1/idea";
 
 
   Future<String?> _getToken() async {
@@ -91,12 +91,69 @@ class IdeaController {
   }
 
   // الحصول على فكرة بواسطة المعرف
-  Future<Map<String, dynamic>?> getIdea(String ideaId) async {
+  Future<List<Map<String, dynamic>>?> getIdea(String ideaId) async {
+    print("getAllForUser() called");
+    final savedToken = await _getToken(); // تأكد من وجود دالة _getToken
+    if (savedToken == null || savedToken.isEmpty) {
+      print("Error: Token is null or empty");
+      return null;
+    }
+    String tokenWithPrefix = 'token__$savedToken';
     try {
-      final response = await http.get(Uri.parse('$baseUrl/get/$ideaId'));
-
+      final response = await http.get(Uri.parse('$baseUrl/get/$ideaId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'token': tokenWithPrefix,
+        },
+      );
+      print("Sent Request to get idea");
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
       if (response.statusCode == 200) {
-        return json.decode(response.body);
+        final responseData = json.decode(response.body);
+        List<Map<String, dynamic>> ideas = [
+          {
+            '_id': responseData['getIdeas']['_id'],
+            'description': responseData['getIdeas']['description'],
+            'emailContact': responseData['getIdeas']['emailContact'],
+            'isPublic': responseData['getIdeas']['isPublic'],
+            'category': responseData['getIdeas']['category'],
+            'createdBy': {
+              '_id': responseData['getIdeas']['createdBy']['_id'],
+              'name': responseData['getIdeas']['createdBy']['name'],
+            },
+            'comments': (responseData['getIdeas']['comments'] as List).map((comment) {
+              return {
+                'createdBy': comment['createdBy'],
+                'content': comment['content'],
+                'createdAt': comment['createdAt'],
+                'userName': comment['userName'],
+                '_id': comment['_id'],
+                'likes': comment['likes'] != null
+                    ? (comment['likes'] as List).map((like) {
+                  return {
+                    '_id': like['_id'],
+                    'createdAt': like['createdAt'],
+                  };
+                }).toList()
+                    : [],
+              };
+            }).toList(),
+            'likes': (responseData['getIdeas']['likes'] as List).map((like) {
+              return {
+                'createdBy': like['createdBy'],
+                'ideaId': like['ideaId'],
+                'createdAt': like['createdAt'],
+                '_id': like['_id'],
+              };
+            }).toList(),
+            'createdAt': responseData['getIdeas']['createdAt'],
+          }
+        ];
+
+        print('Successfully fetched ideas: ${responseData['ideas']}'); // طباعة الأفكار المسترجعة
+        print('Successfully fetched ideas: $ideas');
+        return ideas;
       } else {
         print('Failed to get idea: ${response.statusCode}');
       }
@@ -295,6 +352,7 @@ class IdeaController {
         final responseData = json.decode(response.body);
         List<Map<String, dynamic>> ideas = (responseData['getIdeas'] as List)
             .map((idea) => {
+              '_id':idea['_id'],
           'category': idea['category'],
           'description': idea['description'],
           'isPublic': idea['isPublic'],

@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'AuthController.dart';
 
 class BMCcontroller {
-  final String baseUrl = "http://192.168.1.25:4000/api/v1/businessCanva";
+  final String baseUrl = "http://172.29.32.1:4000/api/v1/businessCanva";
 
   Future<String?> _getToken() async {
     AuthController authController = AuthController();
@@ -33,7 +33,7 @@ class BMCcontroller {
 
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/addBusinessCanva/6790e05564da1d62885f5e00'),
+        Uri.parse('$baseUrl/addBusinessCanva/67a4833adbe6cc6fd435b634'),
         headers: {'Content-Type': 'application/json',
           'token': tokenWithPrefix,},
         body: json.encode({
@@ -62,5 +62,44 @@ class BMCcontroller {
       return {'success': false, 'message': "An error occurred"};
     }
     return null;
+  }
+//getBusinessCanva
+  Future<Map<String, dynamic>?> getBusinessCanva(String id) async {
+    final savedToken = await _getToken();
+    if (savedToken == null || savedToken.isEmpty) {
+      print("Error: Token is null or empty");
+      return {'success': false, 'message': "Authentication token is missing"};
+    }
+    String tokenWithPrefix = 'token__$savedToken';
+    print("token: ${tokenWithPrefix}");
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/getBusinessCanva/67a4833adbe6cc6fd435b634'),
+        headers: {
+          'Content-Type': 'application/json',
+          'token': tokenWithPrefix,
+        },
+      );
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+      final responseData = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'data': responseData,
+          'message': "BMC retrieved successfully!",
+        };
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? "Failed to retrieve BMC",
+        };
+      }
+    } catch (error) {
+      print('Error: $error');
+      return {'success': false, 'message': "An error occurred"};
+    }
   }
 }

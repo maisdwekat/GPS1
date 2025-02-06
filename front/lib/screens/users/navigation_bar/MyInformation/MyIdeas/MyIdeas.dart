@@ -276,7 +276,7 @@ class _MyIdeasScreenState extends State<MyIdeasScreen> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => PreviewIdeaScreen()),
+                          MaterialPageRoute(builder: (context) => PreviewIdeaScreen(ideaId: idea['_id'],)),
                         );
                       },
                       style: ElevatedButton.styleFrom(
