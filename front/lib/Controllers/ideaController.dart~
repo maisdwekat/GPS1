@@ -219,20 +219,10 @@ class IdeaController {
   // تحديث فكرة بواسطة المعرف
   Future<String?> updateIdea(
       String ideaId, String description, bool isPublic, String category) async {
-    final savedToken = await token.getToken();
-    if (savedToken == null || savedToken.isEmpty) {
-      print("Error: Token is null or empty");
-      return "Authentication token is missing";
-    }
-    String tokenWithPrefix = 'token__$savedToken';
-    print("token: ${tokenWithPrefix}");
-
     try {
-      final response = await http.patch(
+      final response = await http.put(
         Uri.parse('$baseUrl/update/$ideaId'),
-        headers: {'Content-Type': 'application/json',
-        'token': tokenWithPrefix,
-        },
+        headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'description': description,
           'isPublic': isPublic,

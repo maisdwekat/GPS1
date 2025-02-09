@@ -250,7 +250,7 @@ class _AddideaScreenState extends State<AddideaScreen> {
     width: 700,
     color: Colors.white,
     child: DropdownButtonFormField<String>(
-      value: categories.contains(selectedCategory) ? selectedCategory : categories.first,
+      value: categories.contains(selectedCategory) ? selectedCategory : null,
       items:categories .map((String value) {
     return DropdownMenuItem<String>(
 

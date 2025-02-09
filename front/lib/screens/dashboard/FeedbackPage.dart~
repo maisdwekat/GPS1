@@ -211,8 +211,6 @@ class _FeedbackTableState extends State<FeedbackTable> {
                         feedbackController.deleteFeedback(feedbackId);
                         if (widget.feedbackList != null) {
                           widget.feedbackList!.clear();
-                          widget.feedbackList =
-                          await feedbackController.getAllFeedbackForAdmin();
                         } else {
                           widget.feedbackList =
                               await feedbackController.getAllFeedbackForAdmin();

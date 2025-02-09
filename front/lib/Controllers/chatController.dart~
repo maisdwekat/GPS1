@@ -32,7 +32,7 @@ class ChatController {
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         messages.clear();
-        messages.addAll(responseData['conversation']['messages']);
+        messages.addAll(responseData['messages']);
 
       } else {
         print('Failed to send message: ${response.statusCode}');

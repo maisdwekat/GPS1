@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:ggg_hhh/Controllers/AuthController.dart';
+import 'package:ggg_hhh/Controllers/token_controller.dart';
 
 import '../../../components/already_have_an_account_acheck.dart';
 import '../../../constants.dart';
 import '../../Signup/signup_screen.dart';
+import '../../dashboard/Dashboard.dart';
 import '../../investor/homepageinvestor/HomePageScreeninvestor.dart';
 import '../../users/homepageUsers/HomePageScreenUsers.dart';
 import '../../Login/components/forgot_password.dart'; // تأكد من استيراد صفحة استعادة كلمة المرور
@@ -25,8 +27,8 @@ class LoginForm extends StatelessWidget {
 
   // دالة للحصول على التوكن
   void _getToken(BuildContext context) async {
-    AuthController authController = AuthController();
-    String? savedToken = await authController.getToken();
+    TokenController token = TokenController();
+    String? savedToken = await token.getToken();
 
     if (savedToken != null) {
       print('تم العثور على التوكن: $savedToken');
@@ -51,7 +53,7 @@ class LoginForm extends StatelessWidget {
         print('توجيه إلى الصفحة الرئيسية للمسؤول');
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => homepagescreen()),
+          MaterialPageRoute(builder: (context) => DashboardPage()),
         );
       } else {
         print('الدور غير معترف به: $role');
@@ -60,6 +62,7 @@ class LoginForm extends StatelessWidget {
         );
       }
     } else {
+
       print('لم يتم العثور على التوكن');
     }
   }

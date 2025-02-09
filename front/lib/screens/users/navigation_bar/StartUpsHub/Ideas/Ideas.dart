@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:ggg_hhh/Controllers/ideaController.dart';
 import '../../../../../constants.dart';
 import '../../../../basic/footer.dart';
 import '../../../../basic/header.dart';
 import '../../DrawerUsers/DrawerUsers.dart';
 import '../../NavigationBarUsers.dart';
 import 'IdeasInformation.dart';
-
 
 class IdeasScreen extends StatefulWidget {
   const IdeasScreen({super.key});
@@ -16,35 +16,25 @@ class IdeasScreen extends StatefulWidget {
 
 class _IdeasScreenState extends State<IdeasScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final TextEditingController _searchController = TextEditingController(); // إضافة متحكم للبحث
+  final TextEditingController _searchController =
+      TextEditingController(); // إضافة متحكم للبحث
 
+  List<dynamic> ideas = [];
+  IdeaController idea = IdeaController();
 
-  final List<Map<String, dynamic>> ideas = [
-    {
-      'description': 'تطوير تطبيق يتيح للمستخدمين طلب الطعام من المطاعم المحلية وتوصيله إلى منازلهم.',
-      'commentsCount': 5, // عدد التعليقات
-      'likesCount': 15, // عدد الإعجابات
-      'isLiked': false, // حالة الإعجاب
-    },
-    {
-      'description': 'إنشاء منصة لتقديم الدورات التعليمية عبر الإنترنت لمختلف المجالات.',
-      'commentsCount': 8, // عدد التعليقات
-      'likesCount': 20, // عدد الإعجابات
-      'isLiked': false, // حالة الإعجاب
-    },
-    {
-      'description': 'تطوير خدمة تأجير السيارات عبر تطبيق يتيح للمستخدمين اختيار السيارة المناسبة.',
-      'commentsCount': 12, // عدد التعليقات
-      'likesCount': 30, // عدد الإعجابات
-      'isLiked': false, // حالة الإعجاب
-    },
-    {
-      'description': 'تطبيق يساعد المستخدمين على تنظيم مهامهم اليومية وإدارة الوقت بشكل فعال.',
-      'commentsCount': 3, // عدد التعليقات
-      'likesCount': 10, // عدد الإعجابات
-      'isLiked': false, // حالة الإعجاب
-    },
-  ];
+  getAllIdea() async {
+
+    ideas = await idea.getAllIdeas();
+    setState(() {
+
+    });
+  }
+
+  @override
+  void initState() {
+    getAllIdea();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +66,8 @@ class _IdeasScreenState extends State<IdeasScreen> {
                   decoration: BoxDecoration(
                     color: Colors.lightGreen[100], // لون الخلفية
                     borderRadius: BorderRadius.circular(8.0),
-                    border: Border.all(color: Colors.orangeAccent), // لون الحدود
+                    border:
+                        Border.all(color: Colors.orangeAccent), // لون الحدود
                   ),
                   child: Row(
                     children: [
@@ -102,13 +93,13 @@ class _IdeasScreenState extends State<IdeasScreen> {
               ),
             ),
 
-
             const SizedBox(height: 40),
             Wrap(
               alignment: WrapAlignment.center,
               spacing: 20,
               runSpacing: 20,
-              children: ideas.map((idea) => _buildInfoCardForIdeas(idea)).toList(),
+              children:
+                  ideas.map((idea) => _buildInfoCardForIdeas(idea)).toList(),
             ),
             const SizedBox(height: 40),
             Footer(),
@@ -118,7 +109,7 @@ class _IdeasScreenState extends State<IdeasScreen> {
     );
   }
 
-  Widget _buildInfoCardForIdeas(Map<String, dynamic> item) {
+  Widget _buildInfoCardForIdeas(dynamic item) {
     return Container(
       width: MediaQuery.of(context).size.width * 0.28,
       padding: const EdgeInsets.all(16.0),
@@ -145,7 +136,8 @@ class _IdeasScreenState extends State<IdeasScreen> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8.0),
               image: DecorationImage(
-                image: AssetImage('assets/images/defaultimg.jpeg'), // المسار للصورة الموحدة
+                image: AssetImage('assets/images/defaultimg.jpeg'),
+                // المسار للصورة الموحدة
                 fit: BoxFit.cover,
               ),
             ),
@@ -159,7 +151,8 @@ class _IdeasScreenState extends State<IdeasScreen> {
           ),
           const SizedBox(height: 8), // مسافة قبل الأيقونات
           Row(
-            mainAxisAlignment: MainAxisAlignment.start, // محاذاة العناصر إلى اليسار
+            mainAxisAlignment: MainAxisAlignment.start,
+            // محاذاة العناصر إلى اليسار
             children: [
               // أيقونة التعليقات
               Column(
@@ -169,11 +162,13 @@ class _IdeasScreenState extends State<IdeasScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => IdeasInformationScreen()),
-                      );                    },
+                        MaterialPageRoute(
+                            builder: (context) => IdeasInformationScreen()),
+                      );
+                    },
                   ),
                   Text(
-                    '${item['commentsCount']}', // عدد التعليقات
+                    '${10}', // عدد التعليقات
                     style: TextStyle(fontSize: 12), // حجم النص
                   ),
                 ],
@@ -185,23 +180,26 @@ class _IdeasScreenState extends State<IdeasScreen> {
                   IconButton(
                     icon: Icon(
                       Icons.favorite,
-                      color: item['isLiked'] ? Colors.red : kPrimaryColor, // تغيير اللون حسب حالة الإعجاب
+                      // color: item['isLiked']
+                      //     ? Colors.red
+                      //     : kPrimaryColor, // تغيير اللون حسب حالة الإعجاب
                     ),
                     onPressed: () {
-                      setState(() {
-                        item['isLiked'] = !item['isLiked']; // تغيير حالة الإعجاب
-                        if (item['isLiked']) {
-                          item['likesCount']++; // زيادة عدد الإعجابات
-                        } else {
-                          item['likesCount']--; // تقليل عدد الإعجابات
-                        }
-                      });
+                      // setState(() {
+                      //   item['isLiked'] =
+                      //       !item['isLiked']; // تغيير حالة الإعجاب
+                      //   if (item['isLiked']) {
+                      //     item['likesCount']++; // زيادة عدد الإعجابات
+                      //   } else {
+                      //     item['likesCount']--; // تقليل عدد الإعجابات
+                      //   }
+                      // });
                     },
                   ),
-                  Text(
-                    '${item['likesCount']}', // عدد الإعجابات
-                    style: TextStyle(fontSize: 12), // حجم النص
-                  ),
+                  // Text(
+                  //   '${item['likesCount']}', // عدد الإعجابات
+                  //   style: TextStyle(fontSize: 12), // حجم النص
+                  // ),
                 ],
               ),
             ],
@@ -212,7 +210,8 @@ class _IdeasScreenState extends State<IdeasScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => IdeasInformationScreen()),
+                MaterialPageRoute(
+                    builder: (context) => IdeasInformationScreen()),
               );
             },
             child: Text('المزيد من المعلومات'),

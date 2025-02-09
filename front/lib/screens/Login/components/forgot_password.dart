@@ -64,7 +64,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     try {
       var response = await http.patch(
 
-        Uri.parse('http://172.29.32.1:4000/api/v1/auth/sendcode'),
+        Uri.parse('http://192.168.1.24:4000/api/v1/auth/sendcode'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(regBody),
       );

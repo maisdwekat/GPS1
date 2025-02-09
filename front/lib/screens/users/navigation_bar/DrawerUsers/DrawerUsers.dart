@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ggg_hhh/Controllers/token_controller.dart';
 
 import '../../../Welcome/welcome_screen.dart';
 import '../MyInformation/MyAccount.dart';
@@ -41,7 +42,9 @@ class DrawerUsers extends StatelessWidget {
           ListTile(
             title: const Text('تسجيل خروج'),
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => WelcomeScreen()));
+              TokenController tokenController = TokenController();
+              tokenController.logout();
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => WelcomeScreen()), (route) => false);
             },
           ),
         ],

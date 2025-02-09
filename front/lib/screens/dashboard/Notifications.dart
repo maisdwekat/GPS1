@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../Welcome/welcome_screen.dart';
 import '../users/navigation_bar/NavigationBarUsers.dart';
 import 'ActiveUsersTable.dart';
 import 'Courses.dart';
@@ -54,6 +55,8 @@ class _NotificationsState extends State<Notifications> {
           _buildMenuItem(context, "المنح", Grantpage()),
           _buildMenuItem(context, "الاشعارات", Notifications()),
           _buildMenuItem(context, "الرسائل", chat()),
+          _buildMenuItem(context, "تسجيل خروج", WelcomeScreen()),
+
         ],
       ),
     );

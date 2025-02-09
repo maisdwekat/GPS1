@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:ggg_hhh/Controllers/token_controller.dart';
+import '../Welcome/welcome_screen.dart';
 import '../investor/homepageinvestor/HomePageScreeninvestor.dart';
 import '../users/homepageUsers/HomePageScreenUsers.dart';
 import 'IdeaDetailsPage.dart';
@@ -44,6 +46,8 @@ class DashboardPage extends StatelessWidget {
           _buildMenuItem(context, "المنح", Grantpage()),
           _buildMenuItem(context, "الاشعارات", Notifications()),
           _buildMenuItem(context, "الرسائل", chat()),
+          _buildMenuItem(context, "تسجيل خروج", WelcomeScreen()),
+
         ],
       ),
     );
@@ -56,11 +60,19 @@ class DashboardPage extends StatelessWidget {
         style: TextStyle(color: Colors.white54),
       ),
       onTap: () {
+        if (page is WelcomeScreen) {
+          TokenController tokenController=TokenController();
+          tokenController.logout();
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => page),(route) => false,);
+        }
+        else{
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => page),
         );
-      },
+      }},
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../Controllers/BMCcontroller.dart';
+import '../../../../../Widget/bmc_widget.dart';
 import '../../../../../constants.dart';
 import '../../LaunchProject/Stages/Stage2.dart';
 import 'MyStartupProjects.dart'; // تأكد من استيراد ملف الثوابت
@@ -10,37 +11,9 @@ class BMCformscreen extends StatefulWidget {
 }
 
 class _BMCformscreenState extends State<BMCformscreen> {
-  final List<TextEditingController> _controllers = List.generate(9, (index) => TextEditingController());
-  final BMCcontroller _bmcController = BMCcontroller();
 
-  @override
-  void initState() {
-    super.initState();
-    _loadBusinessCanva();
-  }
 
-  Future<void> _loadBusinessCanva() async {
-    final result = await _bmcController.getBusinessCanva("6790e05564da1d62885f5e00");
-    if (result != null && result['success']) {
-      var data = result['data'];
 
-      // تحديث المحتوى الخاص بالأقسام بناءً على البيانات المسترجعة
-      _controllers[0].text = (data['keyPartners'] as List<dynamic>).join(", ") ?? "";
-      _controllers[1].text = (data['keyActivities'] as List<dynamic>).join(", ") ?? "";
-      _controllers[2].text = (data['keyResources'] as List<dynamic>).join(", ") ?? "";
-      _controllers[3].text = (data['valuePropositions'] as List<dynamic>).join(", ") ?? "";
-      _controllers[4].text = (data['customerRelationships'] as List<dynamic>).join(", ") ?? "";
-      _controllers[5].text = (data['channels'] as List<dynamic>).join(", ") ?? "";
-      _controllers[6].text = (data['customerSegments'] as List<dynamic>).join(", ") ?? "";
-      _controllers[7].text = (data['costStructure'] as List<dynamic>).join(", ") ?? "";
-      _controllers[8].text = (data['revenueStreams'] as List<dynamic>).join(", ") ?? "";
-
-      setState(() {});
-    } else {
-      // معالجة الأخطاء أو عرض رسالة للمستخدم
-      print(result?['message']);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,68 +29,12 @@ class _BMCformscreenState extends State<BMCformscreen> {
             },
           ),
         ),
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'نموذج العمل التجاري',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: kPrimaryColor,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            Expanded(
-              child: Center(
-                child: BusinessModelCanvas(controllers: _controllers),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildActionButton(context, label: 'تنزيل', onPressed: () {
-                    // هنا يمكنك إضافة وظيفة زر التنزيل في المستقبل
-                  }),
-                  _buildActionButton(context, label: 'حفظ', onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => MyStartupProjectsScreen()),
-                    );
-                  }),
-                ],
-              ),
-            ),
-          ],
-        ),
+        body:
+        BmcWidget(),
       ),
     );
   }
 
-  Widget _buildActionButton(BuildContext context, {required String label, required VoidCallback onPressed}) {
-    return Container(
-      width: 250,
-      height: 50,
-      decoration: BoxDecoration(
-        color: kPrimaryColor,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: TextButton(
-        onPressed: onPressed,
-        child: Text(
-          label,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class BusinessModelCanvas extends StatelessWidget {
@@ -229,14 +146,11 @@ class BusinessModelCanvas extends StatelessWidget {
                 // لا حاجة لتعيين حدود هنا
                 // إذا أردت، يمكنك إضافة لون خلفية أو أي خصائص أخرى
               ),
-              child: TextField(
-                controller: controller,
-                maxLines: null, // يسمح بإظهار عدة أسطر
-                decoration: InputDecoration(
-                  border: InputBorder.none, // إزالة الحدود من TextField
+              child: Center(
+                child: Text(
+                  controller.text,
+                  style: TextStyle(fontSize: 12), // حجم الخط
                 ),
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12), // حجم الخط
               ),
             ),
           ),

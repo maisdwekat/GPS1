@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../Welcome/welcome_screen.dart';
 import 'ActiveUsersTable.dart';
 import 'Courses.dart';
 import 'Dashboard.dart';
@@ -52,6 +53,8 @@ class _IdeasPageState extends State<IdeasPage> {
           _buildMenuItem(context, "المنح", Grantpage()),
           _buildMenuItem(context, "الاشعارات", Notifications()),
           _buildMenuItem(context, "الرسائل", chat()),
+          _buildMenuItem(context, "تسجيل خروج", WelcomeScreen()),
+
         ],
       ),
     );

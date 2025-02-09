@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
 
+import '../../../../Controllers/token_controller.dart';
+import '../../../../constants.dart';
 import '../../homepageUsers/HomePageScreenUsers.dart';
 import 'MyIdeas/MyIdeas.dart';
 import 'MyStartupProjects/MyStartupProjects.dart';
@@ -16,62 +18,92 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData();
+  }
   Uint8List? _profileImage;
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _birthDateController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController(); // New phone controller
-  String _gender = 'ذكر';
-
+  String _gender = 'male';
+  TokenController token =TokenController();
   Future<void> _fetchUserData() async {
-    final response = await http.get(
-      Uri.parse('http://192.168.1.25:4000/api/v1/auth/signup'),
-    );
 
+    final savedToken =await token.getToken();
+    if (savedToken == null || savedToken.isEmpty) {
+      print("Error: Token is null or empty");
+      //return {'success': false, 'message': "Authentication token is missing"};
+    }
+    String tokenWithPrefix = 'token__$savedToken';
+
+    try{
+    final response = await http.get(
+      Uri.parse('http://$ip:4000/api/v1/auth/getAccount'),
+      headers: {
+        'Content-Type': 'application/json',
+        'token': tokenWithPrefix,},
+    );
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
+      var userData = data['user'];
+      print(" $data");
       setState(() {
-        _fullNameController.text = data['fullName'];
-        _emailController.text = data['email'];
-        _birthDateController.text = data['birthDate'];
-        _gender = data['gender'];
-        _phoneController.text = data['phone']; // Fetching phone
+        _fullNameController.text = userData['name'] ?? '';  // الآن نصل إلى name داخل 'user'
+        _emailController.text = userData['email'] ?? '';  // الوصول إلى email داخل 'user'
+        _birthDateController.text = '2020';  // يمكنك تعديل هذا كما تراه مناسباً
+        _gender = userData['gender'] ?? 'male';  // الوصول إلى gender داخل 'user'
+        _phoneController.text = userData['phoneNumber'] ?? '';
       });
+
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('فشل في جلب بيانات المستخدم')),
       );
-    }
+    }} catch (error) {
+  print('Error: $error');
+  //return {'success': false, 'message': "An error occurred"};
+  }
   }
 
   Future<void> _updateUserData() async {
-    final response = await http.put(
-      Uri.parse('https://your-backend-url.com/api/user/profile'),
+    final savedToken =await token.getToken();
+    if (savedToken == null || savedToken.isEmpty) {
+      print("Error: Token is null or empty");
+      //return {'success': false, 'message': "Authentication token is missing"};
+    }
+    String tokenWithPrefix = 'token__$savedToken';
+    try{
+    final response = await http.patch(
+      Uri.parse('http://$ip:4000/api/v1/auth/updateUserInfo'),
       headers: {
         'Content-Type': 'application/json',
+        'token': tokenWithPrefix,
       },
       body: json.encode({
-        'fullName': _fullNameController.text,
+        'name': _fullNameController.text,
         'email': _emailController.text,
-        'birthDate': _birthDateController.text,
+       // 'birthDate': _birthDateController.text,
+        'phoneNumber': _phoneController.text, // Sending phone
         'gender': _gender,
-        'phone': _phoneController.text, // Sending phone
       }),
     );
-
     if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('تم تحديث البيانات بنجاح')),
       );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => homepagescreen()),
-      );
     } else {
+      print("Failed Response: ${response.body}");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('فشل في تحديث البيانات')),
       );
+    }
+    } catch (error) {
+      print('Error: $error');
+      //return {'success': false, 'message': "An error occurred"};
     }
   }
 
@@ -93,11 +125,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchUserData();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -331,8 +358,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: DropdownButtonFormField<String>(
               value: _gender,
               items: [
-                DropdownMenuItem(value: 'ذكر', child: Text('ذكر')),
-                DropdownMenuItem(value: 'أنثى', child: Text('أنثى')),
+                DropdownMenuItem(value: 'male', child: Text('male')),
+                DropdownMenuItem(value: 'female', child: Text('female')),
               ],
               onChanged: (value) {
                 setState(() {

@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import '../../../screens/login/login_screen.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
+import '../../Controllers/token_controller.dart';
+import '../dashboard/Dashboard.dart';
+import '../investor/homepageinvestor/HomePageScreeninvestor.dart';
+import '../users/homepageUsers/HomePageScreenUsers.dart';
 
 class WelcomeScreen extends StatefulWidget  {
   const WelcomeScreen({super.key});
@@ -12,6 +18,57 @@ class WelcomeScreen extends StatefulWidget  {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
+  TokenController token = TokenController();
+
+  void _getToken(BuildContext context) async {
+    String? savedToken = await token.getToken();
+
+    if (savedToken != null) {
+      print('تم العثور على التوكن: $savedToken');
+      var user = token.decodedToken(savedToken);
+      role=user['role'];
+      print('تم فك تشفير التوكن، الدور: $role');
+
+      if (role == 'investor') {
+        print('توجيه إلى صفحة المستثمر');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomePageScreeninvestor()),
+        );
+      } else if (role == 'user') {
+        print('توجيه إلى الصفحة الرئيسية للمستخدم');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => homepagescreen()),
+        );
+      } else if (role == 'admin') {
+        print('توجيه إلى الصفحة الرئيسية للمسؤول');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => DashboardPage()),
+        );
+      } else {
+        print('الدور غير معترف به: $role');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Role not recognized: $role')),
+        );
+      }
+    } else {
+
+      print('لم يتم العثور على التوكن');
+    }
+  }
+  initState() {
+    Future.delayed(const Duration(seconds: 3), _nextPage);
+
+    _getToken(context);
+    super.initState();
+  }
+  String? role; // متغير لحفظ التوكن وعرضه
+
+  // دالة للحصول على التوكن
+
+
   final PageController _pageController = PageController(viewportFraction: 1.0);
   int _currentPage = 0;
 
@@ -37,11 +94,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     },
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    Future.delayed(const Duration(seconds: 3), _nextPage);
-  }
 
   void _nextPage() {
     _currentPage++;

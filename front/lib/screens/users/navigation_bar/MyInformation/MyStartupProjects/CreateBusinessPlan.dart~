@@ -260,7 +260,7 @@ class _CreateBusinessPlanScreenState extends State<CreateBusinessPlanScreen> {
         onPressed: () {
           print('زر الحفظ تم الضغط عليه!'); // طباعة رسالة عند الضغط على الزر
           if(widget.toUpdate == true){
-            _updateBusinessCanva();
+            print('test update');
           }
           else {
             _saveBusinessCanva();

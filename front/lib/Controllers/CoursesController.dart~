@@ -47,8 +47,8 @@ class CoursesController {
       print('Response Body: ${response.body}');
       final responseData = json.decode(response.body);
 
-      if (response.statusCode == 201 && responseData.containsKey('saveIdea')) {
-        return {'success': true, 'message': "Courses added successfully!"};
+      if (response.statusCode == 200 && responseData.containsKey('saveIdea')) {
+        return {'success': true, 'message': "Idea added successfully!"};
       } else {
         return {'success': false, 'message': responseData['message'] ?? "Failed to add idea"};
       }
@@ -66,18 +66,15 @@ class CoursesController {
       return [];
     }
     try {
-
       final response = await http.get(Uri.parse('$baseUrl/all'),headers: {
         'Content-Type': 'application/json',
         'token': 'token__$savedToken',
       });
-      print("getAllCourses Requset Sent");
-      print(response.statusCode);
+
       if (response.statusCode == 200) {
         final responesData = json.decode(response.body);
-        List< dynamic> ideas = (responesData['findAll'] as List);
+        List< dynamic> ideas = (responesData['getCourses'] as List);
         return ideas;
-
       } else {
         print('Failed to get all Courses: ${response.statusCode}');
       }
@@ -86,7 +83,6 @@ class CoursesController {
     }
     return [];
   }
-
 
 
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../Controllers/feedbackController.dart';
 import '../../basic/footer.dart';
 import '../../basic/header.dart';
 import '../navigation_bar/DrawerUsers/DrawerUsers.dart';
@@ -13,41 +14,41 @@ class FeedbackPage extends StatefulWidget {
 }
 
 class _FeedbackPageState extends State<FeedbackPage> {
-
-  void _submitFeedback() async {
-    if (_formKey.currentState!.validate()) {
-      final email = _emailController.text;
-      final feedback = _feedbackController.text;
-
-      // إعداد بيانات الفيدباك
-      final Map<String, String> data = {
-        'email': email,
-        'feedback': feedback,
-      };
-
-      // إرسال بيانات الفيدباك إلى الباك إند
-      final response = await http.post(
-        Uri.parse('https://your-backend-url.com/api/feedback'), // استبدل بعنوان URL الخاص بك
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(data),
-      );
-
-      if (response.statusCode == 200) {
-        // الفيدباك تم إرساله بنجاح
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('تم إرسال الفيدباك بنجاح!')),
-        );
-        // يمكنك إعادة تعيين الحقول هنا إذا رغبت
-        _emailController.clear();
-        _feedbackController.clear();
-      } else {
-        // حدث خطأ أثناء الإرسال
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('حدث خطأ أثناء إرسال الفيدباك.')),
-        );
-      }
-    }
-  }
+ FeedbackController feedbackController = FeedbackController();
+  // void _submitFeedback() async {
+  //   if (_formKey.currentState!.validate()) {
+  //     final email = _emailController.text;
+  //     final feedback = _feedbackController.text;
+  //
+  //     // إعداد بيانات الفيدباك
+  //     final Map<String, String> data = {
+  //       'email': email,
+  //       'feedback': feedback,
+  //     };
+  //
+  //     // إرسال بيانات الفيدباك إلى الباك إند
+  //     final response = await http.post(
+  //       Uri.parse('https://your-backend-url.com/api/feedback'), // استبدل بعنوان URL الخاص بك
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: json.encode(data),
+  //     );
+  //
+  //     if (response.statusCode == 200) {
+  //       // الفيدباك تم إرساله بنجاح
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('تم إرسال الفيدباك بنجاح!')),
+  //       );
+  //       // يمكنك إعادة تعيين الحقول هنا إذا رغبت
+  //       _emailController.clear();
+  //       _feedbackController.clear();
+  //     } else {
+  //       // حدث خطأ أثناء الإرسال
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('حدث خطأ أثناء إرسال الفيدباك.')),
+  //       );
+  //     }
+  //   }
+  // }
 
 
 
@@ -139,34 +140,34 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 crossAxisAlignment: CrossAxisAlignment.end, // محاذاة العناصر إلى اليسار
                 children: [
                   // عنوان البريد الإلكتروني
-                  Text(
-                    'البريد الإلكتروني',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 5), // فراغ بين العنوان وحقل الإدخال
-                  // حقل إدخال البريد الإلكتروني
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10), // زوايا مدورة
-                        borderSide: BorderSide(color: Colors.orangeAccent), // لون الحدود
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'يرجى إدخال البريد الإلكتروني';
-                      }
-                      // التحقق من تنسيق البريد الإلكتروني
-                      String pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
-                      RegExp regex = RegExp(pattern);
-                      if (!regex.hasMatch(value)) {
-                        return 'يرجى إدخال بريد إلكتروني صالح';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
+                  // Text(
+                  //   'البريد الإلكتروني',
+                  //   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  // ),
+                  // SizedBox(height: 5), // فراغ بين العنوان وحقل الإدخال
+                  // // حقل إدخال البريد الإلكتروني
+                  // TextFormField(
+                  //   controller: _emailController,
+                  //   decoration: InputDecoration(
+                  //     border: OutlineInputBorder(
+                  //       borderRadius: BorderRadius.circular(10), // زوايا مدورة
+                  //       borderSide: BorderSide(color: Colors.orangeAccent), // لون الحدود
+                  //     ),
+                  //   ),
+                  //   validator: (value) {
+                  //     if (value == null || value.isEmpty) {
+                  //       return 'يرجى إدخال البريد الإلكتروني';
+                  //     }
+                  //     // التحقق من تنسيق البريد الإلكتروني
+                  //     String pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
+                  //     RegExp regex = RegExp(pattern);
+                  //     if (!regex.hasMatch(value)) {
+                  //       return 'يرجى إدخال بريد إلكتروني صالح';
+                  //     }
+                  //     return null;
+                  //   },
+                  // ),
+                  // const SizedBox(height: 20),
                   // عنوان الفيدباك
                   Text(
                     'شارك رأيك معنا',
@@ -194,7 +195,9 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   const SizedBox(height: 20),
                   Center( // وضع الزر في المنتصف
                     child: ElevatedButton(
-                      onPressed: _submitFeedback,
+                      onPressed: ()async{
+                        await feedbackController.addFeedback(_feedbackController.text);
+                      },
                       child: Text('إرسال الفيدباك'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFF0A1D47),

@@ -482,12 +482,12 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
           itemCount: _comments.length,
           itemBuilder: (context, index) {
             var commentData = _comments[index];
-            var likesComentlist=commentData['likes'].map((like) => like['_id']).toList();
+            var likesComentlist=commentData['likes'];
 
             return _buildCommentItem(
               comment: commentData['content']!,
               commentId: commentData['_id']!,
-               isLiked:likesComentlist.contains({ userid.toString()},) ,
+               isLiked:likesComentlist.contains({'_id': userid.toString()},) ,
               Likes:_likesCommentList,
               userImageUrl:"assets/images/defaultpfp.jpg" ,
 

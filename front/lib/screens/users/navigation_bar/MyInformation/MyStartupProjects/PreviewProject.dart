@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ggg_hhh/Widget/bmc_widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../../../ChatForInquiries/ChatForInquiries.dart';
@@ -6,6 +7,7 @@ import '../../../../investor/navigation_bar_investor/MyInformation/RequestFormUp
 import '../../../../investor/navigation_bar_investor/MyInformation/Request_form.dart';
 import '../MyAccount.dart';
 import '../MyIdeas/MyIdeas.dart';
+import 'CreateBusinessPlan.dart';
 import 'MyStartupProjects.dart';
 
 class PreviewProjectScreen extends StatefulWidget {
@@ -38,7 +40,6 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
       _selectedContent = content; // تعيين المحتوى كـ Widget
     });
   }
-
 
   void _showChatDialog(BuildContext context) {
     showDialog(
@@ -118,8 +119,8 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
                       ? FileImage(File(_profileImage))
                       : const AssetImage('assets/images/defaultpfp.jpg'),
                   child: _profileImage.isEmpty
-                      ? const Icon(
-                      Icons.camera_alt, size: 30, color: Colors.grey)
+                      ? const Icon(Icons.camera_alt,
+                          size: 30, color: Colors.grey)
                       : null,
                 ),
                 const Icon(Icons.edit, color: Color(0xFF0A1D47)),
@@ -179,7 +180,6 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
       ],
     );
   }
-
 
   Widget _buildProjectDetails() {
     return Container(
@@ -255,7 +255,8 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
               },
               child: Text(
                 'ahmed@example.com',
-                style: TextStyle(fontSize: 16,
+                style: TextStyle(
+                    fontSize: 16,
                     color: Colors.blue,
                     decoration: TextDecoration.underline),
               ),
@@ -263,10 +264,10 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
             16,
             16,
           ),
-          _buildAboutSection('الموقع الالكتروني ',
+          _buildAboutSection(
+              'الموقع الالكتروني ',
               GestureDetector(
-                onTap: () {
-                  },
+                onTap: () {},
                 child: Text(
                   'www.example.com',
                   style: TextStyle(
@@ -277,19 +278,20 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
                 ),
               ),
               16,
-              14
-          ),
+              14),
           _buildProgressSection('تاريخ الإنشاء', '2024', 20, 18),
-          _buildAboutSection('نبذة عن المشروع',
+          _buildAboutSection(
+              'نبذة عن المشروع',
               'يطمح المشروع إلى تحقيق نتائج ملموسة تسهم في تحسين العمليات المختلفة...',
-              16, 14),
+              16,
+              14),
         ],
       ),
     );
   }
 
-  Widget _buildAboutSection(String title, dynamic content, double titleSize,
-      double contentSize) {
+  Widget _buildAboutSection(
+      String title, dynamic content, double titleSize, double contentSize) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -302,18 +304,19 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
         content is Widget
             ? content
             : Text(
-          content,
-          style: TextStyle(fontSize: contentSize),
-          textAlign: TextAlign.right,
-          maxLines: null,
-          overflow: TextOverflow.visible,
-        ),
+                content,
+                style: TextStyle(fontSize: contentSize),
+                textAlign: TextAlign.right,
+                maxLines: null,
+                overflow: TextOverflow.visible,
+              ),
         SizedBox(height: 10),
       ],
     );
   }
 
-  Widget _buildProgressSection(String title, String year, double titleSize, double contentSize) {
+  Widget _buildProgressSection(
+      String title, String year, double titleSize, double contentSize) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -336,7 +339,6 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
     );
   }
 
-
 ////////////////////////////////////////////////////
   Widget _buildProjectProgressContent() {
     return Container(
@@ -347,7 +349,6 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
           SizedBox(height: 10),
           _buildProgressSectionWithProgress(
               'المرحلة الحالية', 'مرحلة التحقق والتخطيط', 20, 18, 0.4),
-
         ],
       ),
     );
@@ -397,63 +398,32 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
     );
   }
 
-
-
   ////////////////////////////////////////////////////
 
   Widget _buildBusinessModelContent(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end, // لمحاذاة المحتوى إلى اليمين
+      child: Column(
+        // استخدم عمود لمحاذاة العناصر رأسياً
+        mainAxisAlignment: MainAxisAlignment.end, // لمحاذاة المحتوى إلى الأسفل
         children: [
-          GestureDetector(
-            onTap: () {
-              // عرض الصورة بحجم أكبر عند الضغط عليها
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return Dialog(
-                    child: Container(
-                      width: 800,
-                      // عرض الصورة في النافذة المنبثقة (يمكنك تعديل القيم)
-                      height: 400,
-                      // ارتفاع الصورة في النافذة المنبثقة (يمكنك تعديل القيم)
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.asset(
-                          'assets/images/111.jpg', // استبدل بمسار الصورة الصحيح
-                          fit: BoxFit.cover, // لتغطية المربع بالكامل
-                        ),
-                      ),
-                    ),
-                  );
-                },
+          Container(
+            width: 800,
+            height: 400,
+            child: BmcWidget.pre(isPre: true),
+          ),
+          SizedBox(height: 10), // إضافة مسافة بين الصورة والزر
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => CreateBusinessPlanScreen.toUpdate()),
               );
             },
-            child: Container(
-              width: 600, // عرض الصورة 600
-              height: 300, // يمكنك ضبط الارتفاع حسب الحاجة
-              decoration: BoxDecoration(
-                color: Colors.white, // لون خلفية المربع
-                borderRadius: BorderRadius.circular(10), // زوايا دائرية للمربع
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 4.0,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10), // زوايا دائرية للصورة
-                child: Image.asset(
-                  'assets/images/111.jpg', // استبدل بمسار الصورة الصحيح
-                  width: 600, // عرض الصورة 600
-                  height: 300, // ارتفاع الصورة
-                  fit: BoxFit.cover, // لتغطية المربع بالكامل
-                ),
-              ),
+            child: Text('تعديل'),
+            style: ElevatedButton.styleFrom(
+              minimumSize: Size(150, 50), // تحديد الطول والعرض للزر
             ),
           ),
         ],
@@ -515,11 +485,13 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
           Row(
             children: [
               IconButton(
-                icon: Icon(Icons.edit, color: Colors.orangeAccent), // لون أيقونة التعديل
+                icon: Icon(Icons.edit, color: Colors.orangeAccent),
+                // لون أيقونة التعديل
                 onPressed: () => _showEditNoteDialog(note.content, index),
               ),
               IconButton(
-                icon: Icon(Icons.delete, color: Colors.orangeAccent), // لون أيقونة الحذف
+                icon: Icon(Icons.delete, color: Colors.orangeAccent),
+                // لون أيقونة الحذف
                 onPressed: () => _deleteNote(index),
               ),
             ],
@@ -551,6 +523,7 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
       ));
     });
   }
+
   void _editNote(int index, String newContent) {
     setState(() {
       notes[index].content = newContent;
@@ -618,7 +591,8 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
               },
               decoration: InputDecoration(hintText: 'محتوى الملاحظة'),
               controller: TextEditingController(text: currentContent),
-              maxLines: 5, // عدد الأسطر الأقصى
+              maxLines: 5,
+              // عدد الأسطر الأقصى
               keyboardType: TextInputType.multiline, // نوع لوحة المفاتيح
             ),
           ),
@@ -641,6 +615,7 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
       },
     );
   }
+
   //////////////////////////////////////////////////////////
   List<String> investmentRequests = [
     'طلب استثمار1',
@@ -656,7 +631,8 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
         children: [
           Text(
             'طلبات الاستثمار',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold), // عنوان كبير
+            style: TextStyle(
+                fontSize: 24, fontWeight: FontWeight.bold), // عنوان كبير
           ),
           SizedBox(height: 15), // فراغ قبل الجدول
           Table(
@@ -670,7 +646,9 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
             },
             children: [
               _buildHeaderInvestmentRequestsRow(), // إضافة صف العناوين
-              ...investmentRequests.map((name) => buildInvestmentRequestsRow(name)).toList(),
+              ...investmentRequests
+                  .map((name) => buildInvestmentRequestsRow(name))
+                  .toList(),
             ],
           ),
         ],
@@ -741,7 +719,6 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
             ],
           ),
         ),
-
         Align(
           alignment: Alignment.center,
           child: Column(
@@ -784,6 +761,7 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
     });
     print('تم حذف: $title');
   }
+
   void _showInvestmentDetailsDialog() {
     showDialog(
       context: context,
@@ -829,14 +807,16 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
                   SizedBox(height: 10),
                   _buildLabeledTextField('مدة الاستثمار', width: 0.4),
                   SizedBox(height: 20),
-                  _buildLabeledTextField('ملاحظات إضافية', width: 0.4, maxLines: 3),
+                  _buildLabeledTextField('ملاحظات إضافية',
+                      width: 0.4, maxLines: 3),
                   SizedBox(height: 20),
                   Center(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.2, // ضبط عرض الزر
+                          width: MediaQuery.of(context).size.width *
+                              0.2, // ضبط عرض الزر
                           child: ElevatedButton(
                             onPressed: () {
                               // تنفيذ عملية القبول
@@ -846,7 +826,8 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
                           ),
                         ),
                         SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.2, // ضبط عرض الزر
+                          width: MediaQuery.of(context).size.width *
+                              0.2, // ضبط عرض الزر
                           child: ElevatedButton(
                             onPressed: () {
                               // تنفيذ عملية الرفض
@@ -867,7 +848,8 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
     );
   }
 
-  Widget _buildLabeledTextField(String label, {int maxLines = 1, double width = 0.4}) {
+  Widget _buildLabeledTextField(String label,
+      {int maxLines = 1, double width = 0.4}) {
     return Container(
       width: MediaQuery.of(context).size.width * width,
       child: Column(
@@ -892,6 +874,7 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
     'مستثمر 2',
     'مستثمر 3',
   ];
+
   Widget _buildExistinginvestorsContent() {
     return Container(
       padding: EdgeInsets.all(10),
@@ -900,7 +883,8 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
         children: [
           Text(
             'المستثمرين الحاليين',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold), // عنوان كبير
+            style: TextStyle(
+                fontSize: 24, fontWeight: FontWeight.bold), // عنوان كبير
           ),
           SizedBox(height: 15), // فراغ قبل الجدول
           Table(
@@ -990,8 +974,11 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => RequestFormUpdateScreen()), // استبدل بـ EditInvestmentForm()
-                  );                },
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            RequestFormUpdateScreen()), // استبدل بـ EditInvestmentForm()
+                  );
+                },
               ),
               SizedBox(height: 8), // فراغ بين الاسم والخط السفلي
             ],
@@ -1006,11 +993,12 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
               SizedBox(
                 width: 180, // عرض الزر
                 child: ElevatedButton(
-                  onPressed: (){
-
+                  onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => RequestFormScreen()), // استبدل بـ RequestForm()
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              RequestFormScreen()), // استبدل بـ RequestForm()
                     );
                   },
                   child: Text('نموذج الطلب'),
@@ -1055,83 +1043,86 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
     print('تم حذف: $name');
   }
 }
-  ////////////////////////////////////////////////////////
-  Widget _buildActionItem(String title, Function action) {
-    return GestureDetector(
-      onTap: () {
-        action(); // استدعاء الدالة
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: Text(
-          title,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF001F3F)),
-        ),
-      ),
-    );
-  }
 
-  Widget _buildProjectSummary() {
-    return Container(
-      width: 250,
-      height: 350,
-      padding: EdgeInsets.all(10),
-      margin: EdgeInsets.only(right: 10, left: 20),
-      decoration: BoxDecoration(
-        color: Color(0xFFF0F0F0),
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: Offset(0, 3),
-          ),
-        ],
+////////////////////////////////////////////////////////
+Widget _buildActionItem(String title, Function action) {
+  return GestureDetector(
+    onTap: () {
+      action(); // استدعاء الدالة
+    },
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Text(
+        title,
+        style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF001F3F)),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Container(
-            width: 200,
-            height: 150,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              image: DecorationImage(
-                image: AssetImage('assets/images/p1 (2).jpeg'),
-                fit: BoxFit.cover,
-              ),
+    ),
+  );
+}
+
+Widget _buildProjectSummary() {
+  return Container(
+    width: 250,
+    height: 350,
+    padding: EdgeInsets.all(10),
+    margin: EdgeInsets.only(right: 10, left: 20),
+    decoration: BoxDecoration(
+      color: Color(0xFFF0F0F0),
+      borderRadius: BorderRadius.circular(15),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.2),
+          spreadRadius: 2,
+          blurRadius: 5,
+          offset: Offset(0, 3),
+        ),
+      ],
+    ),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Container(
+          width: 200,
+          height: 150,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            image: DecorationImage(
+              image: AssetImage('assets/images/p1 (2).jpeg'),
+              fit: BoxFit.cover,
             ),
           ),
-          SizedBox(height: 15),
-          Text(
-            'اسم المشروع',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 10),
-          Text(
-            'مجال المشروع',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 10),
-          Container(
-            width: 150,
-            height: 2,
-            color: Color(0xFFE0E0E0),
-          ),
-          SizedBox(height: 15),
-          Text(
-            'وصف مختصر',
-            style: TextStyle(fontSize: 14, color: Colors.green),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
+        ),
+        SizedBox(height: 15),
+        Text(
+          'اسم المشروع',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 10),
+        Text(
+          'مجال المشروع',
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 10),
+        Container(
+          width: 150,
+          height: 2,
+          color: Color(0xFFE0E0E0),
+        ),
+        SizedBox(height: 15),
+        Text(
+          'وصف مختصر',
+          style: TextStyle(fontSize: 14, color: Colors.green),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    ),
+  );
+}
 
 class Note {
   String content;

@@ -57,53 +57,21 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
   }
 
   final ImagePicker _picker = ImagePicker();
-  String? imagePath; // Path of the selected image
-  Uint8List imageBytes = Uint8List(0); // Bytes of the selected image
-  http.MultipartFile? imageFile; // Multipart file for the image
+  String? imagePath; // تأكد من أن لديك قيمة لمتغير imagePath
+  Uint8List imageBytes = Uint8List(8);
+  var imageFile;
 
   Future<void> _pickImage() async {
-    if (kIsWeb) {
-      // Web-specific file picking
-      final input = html.FileUploadInputElement();
-      input.accept = 'image/*'; // Restrict to image files
-      input.click();
-
-      input.onChange.listen((event) async {
-        final file = input.files!.first; // Get the selected file
-        final reader = html.FileReader();
-
-        reader.onLoadEnd.listen((event) async {
-          setState(() {
-            imageBytes = reader.result as Uint8List; // Store image bytes
-            imagePath = file.name; // Store file name as path
-          });
-
-          // Create MultipartFile for the image
-          imageFile = http.MultipartFile.fromBytes(
-            'image',
-            imageBytes,
-            filename: file.name,
-          );
-        });
-
-        reader.readAsArrayBuffer(file); // Read the file as bytes
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      imagePath=image.path;
+      print('تم اختيار الصورة: ${image.path}');
+      final bytes = await image.readAsBytes();
+      setState(() {
+        imageBytes = bytes;
       });
-    } else {
-      // Mobile-specific file picking
-      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-      if (image != null) {
-        setState(() {
-          imagePath = image.path; // Store image path
-        });
+      imageFile=await http.MultipartFile.fromPath('image', image.path) ;// Store the selected image path
 
-        final bytes = await image.readAsBytes();
-        setState(() {
-          imageBytes = bytes; // Store image bytes
-        });
-
-        // Create MultipartFile for the image
-        imageFile = await http.MultipartFile.fromPath('image', image.path);
-      }
     }
   }
 

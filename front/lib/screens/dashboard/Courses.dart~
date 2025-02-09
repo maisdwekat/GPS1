@@ -222,7 +222,7 @@ class _CoursesState extends State<Courses> {
     print("delete Course : ");
     try {
       await _coursesController.deleteCourse(id);
-       fetchCourses(); // تحديث قائمة الدورات بعد الحذف
+      // fetchCourses(); // تحديث قائمة الدورات بعد الحذف
     } catch (e) {
       print('Error: $e');
     }

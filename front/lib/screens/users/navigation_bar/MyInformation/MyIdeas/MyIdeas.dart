@@ -191,6 +191,7 @@ class _MyIdeasScreenState extends State<MyIdeasScreen> {
               children: [
                 for (var idea in _ideas)
                   _buildIdeaCard(idea), // استخدام _ideas هنا
+
               ],
             ),
             SizedBox(height: 100),
@@ -202,6 +203,7 @@ class _MyIdeasScreenState extends State<MyIdeasScreen> {
 
   Widget _buildIdeaCard(Map<String, dynamic> idea) {
     print('بطاقة الفكرة: $idea'); // طباعة الفكرة للتحقق من القيم
+    print('here ********************************************* is id ${idea['_id'].toString()}'); // طباعة الفكرة للتحقق من القيم
 
     return Container(
       width: 200, // عرض البطاقة
@@ -301,7 +303,7 @@ class _MyIdeasScreenState extends State<MyIdeasScreen> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => AddideaScreen()),
+                          MaterialPageRoute(builder: (context) => AddideaScreen.toUpdate(ideaId: idea['_id'])),
                         );
                       },
                       style: ElevatedButton.styleFrom(

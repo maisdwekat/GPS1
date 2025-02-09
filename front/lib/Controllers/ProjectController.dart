@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:ggg_hhh/Controllers/token_controller.dart';
+import 'package:ggg_hhh/constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,26 +9,23 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'AuthController.dart';
 
 class ProjectController extends GetxController {
-  final String baseUrl = "http://172.29.32.1:4000/api/v1/project";
-  Future<String?> getToken() async {
-    AuthController authController = AuthController();
-    String? savedToken = await authController.getToken();
-    return savedToken;
-  }
+  final String baseUrl = "http://$ip:4000/api/v1/project";
+  TokenController tokenController = TokenController();
+
   Future<Map<String, dynamic>> addNewProject(
-      String title,
-      String description,
-      String current_stage,
-      String isPublic,
-      String location,
-      String category,
-      String website,
-      String email,
-      String summary,
-      String date,
-      http.MultipartFile image,
-      String token, // إضافة المعامل token
-      ) async {
+    String title,
+    String description,
+    String current_stage,
+    String isPublic,
+    String location,
+    String category,
+    String website,
+    String email,
+    String summary,
+    String date,
+    http.MultipartFile image,
+    String token, // إضافة المعامل token
+  ) async {
     final url = Uri.parse('$baseUrl/add');
 
     print('إرسال طلب إضافة مشروع جديد إلى: $url');
@@ -59,9 +58,13 @@ class ProjectController extends GetxController {
       return {'success': true, 'message': jsonDecode(response.body)['message']};
     } else {
       print('فشل إضافة المشروع: ${response.body}');
-      return {'success': false, 'message': jsonDecode(response.body)['message'] ?? 'Unknown error'};
+      return {
+        'success': false,
+        'message': jsonDecode(response.body)['message'] ?? 'Unknown error'
+      };
     }
   }
+
   // Delete project
   Future<void> deleteProject(String projectId) async {
     final url = Uri.parse('$baseUrl/delete/$projectId');
@@ -93,9 +96,11 @@ class ProjectController extends GetxController {
       );
     }
   }
+
   // Function to get all projects
   Future<List<dynamic>> getAllProjects() async {
-    final url = Uri.parse('$baseUrl/all'); // Adjust the endpoint based on your API
+    final url =
+        Uri.parse('$baseUrl/all'); // Adjust the endpoint based on your API
     try {
       final response = await http.get(
         url,
@@ -120,22 +125,24 @@ class ProjectController extends GetxController {
       return []; // Return an empty list in case of an error
     }
   }
+
 // Function to update a project
   Future<Map<String, dynamic>> updateProject(
-      String projectId,
-      String title,
-      String description,
-      String current_stage,
-      String isPublic,
-      String location,
-      String category,
-      String website,
-      String email,
-      String summary,
-      String date,
-      String image,
-      ) async {
-    final url = Uri.parse('$baseUrl/update/$projectId'); // Adjust the endpoint based on your API
+    String projectId,
+    String title,
+    String description,
+    String current_stage,
+    String isPublic,
+    String location,
+    String category,
+    String website,
+    String email,
+    String summary,
+    String date,
+    String image,
+  ) async {
+    final url = Uri.parse(
+        '$baseUrl/update/$projectId'); // Adjust the endpoint based on your API
     try {
       final response = await http.put(
         url,
@@ -156,9 +163,15 @@ class ProjectController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        return {'success': true, 'message': jsonDecode(response.body)['message']};
+        return {
+          'success': true,
+          'message': jsonDecode(response.body)['message']
+        };
       } else {
-        return {'success': false, 'message': jsonDecode(response.body)['message']};
+        return {
+          'success': false,
+          'message': jsonDecode(response.body)['message']
+        };
       }
     } catch (e) {
       Get.snackbar(
@@ -171,8 +184,10 @@ class ProjectController extends GetxController {
       return {'success': false, 'message': e.toString()};
     }
   }
+
   //addTask
-  Future<Map<String, dynamic>> addTask(String projectId, Map<String, dynamic> taskData, String token) async {
+  Future<Map<String, dynamic>> addTask(
+      String projectId, Map<String, dynamic> taskData, String token) async {
     final url = Uri.parse('$baseUrl/addTask/$projectId');
     try {
       final response = await http.post(
@@ -185,9 +200,15 @@ class ProjectController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        return {'success': true, 'message': jsonDecode(response.body)['message']};
+        return {
+          'success': true,
+          'message': jsonDecode(response.body)['message']
+        };
       } else {
-        return {'success': false, 'message': jsonDecode(response.body)['message']};
+        return {
+          'success': false,
+          'message': jsonDecode(response.body)['message']
+        };
       }
     } catch (e) {
       Get.snackbar(
@@ -200,9 +221,11 @@ class ProjectController extends GetxController {
       return {'success': false, 'message': e.toString()};
     }
   }
+
 //getTasks
   Future<Map<String, dynamic>> getTask(String taskId, String token) async {
-    final url = Uri.parse('$baseUrl/task/$taskId'); // Adjust the endpoint based on your API
+    final url = Uri.parse(
+        '$baseUrl/task/$taskId'); // Adjust the endpoint based on your API
     try {
       final response = await http.get(
         url,
@@ -233,7 +256,8 @@ class ProjectController extends GetxController {
 
   //deleteTask
   Future<void> deleteTask(String projectId, String taskId, String token) async {
-    final url = Uri.parse('$baseUrl/deleteTask/$projectId/$taskId'); // Adjust the endpoint based on your API
+    final url = Uri.parse(
+        '$baseUrl/deleteTask/$projectId/$taskId'); // Adjust the endpoint based on your API
     try {
       final response = await http.delete(
         url,
@@ -266,7 +290,8 @@ class ProjectController extends GetxController {
   }
 
 //addNote
-  Future<Map<String, dynamic>> addNote(String projectId, Map<String, dynamic> noteData, String token) async {
+  Future<Map<String, dynamic>> addNote(
+      String projectId, Map<String, dynamic> noteData, String token) async {
     final url = Uri.parse('$baseUrl/addNote/$projectId');
     try {
       final response = await http.post(
@@ -279,9 +304,15 @@ class ProjectController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        return {'success': true, 'message': jsonDecode(response.body)['message']};
+        return {
+          'success': true,
+          'message': jsonDecode(response.body)['message']
+        };
       } else {
-        return {'success': false, 'message': jsonDecode(response.body)['message']};
+        return {
+          'success': false,
+          'message': jsonDecode(response.body)['message']
+        };
       }
     } catch (e) {
       Get.snackbar(
@@ -294,6 +325,7 @@ class ProjectController extends GetxController {
       return {'success': false, 'message': e.toString()};
     }
   }
+
   //deleteNote
   Future<void> deleteNote(String projectId, String noteId, String token) async {
     final url = Uri.parse('$baseUrl/deleteNote/$projectId/$noteId');
@@ -327,8 +359,10 @@ class ProjectController extends GetxController {
       );
     }
   }
+
   //updateNote
-  Future<Map<String, dynamic>> updateNote(String projectId, String noteId, Map<String, dynamic> noteData, String token) async {
+  Future<Map<String, dynamic>> updateNote(String projectId, String noteId,
+      Map<String, dynamic> noteData, String token) async {
     final url = Uri.parse('$baseUrl/updateNote/$projectId/$noteId');
     try {
       final response = await http.put(
@@ -341,9 +375,15 @@ class ProjectController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        return {'success': true, 'message': jsonDecode(response.body)['message']};
+        return {
+          'success': true,
+          'message': jsonDecode(response.body)['message']
+        };
       } else {
-        return {'success': false, 'message': jsonDecode(response.body)['message']};
+        return {
+          'success': false,
+          'message': jsonDecode(response.body)['message']
+        };
       }
     } catch (e) {
       Get.snackbar(
@@ -356,6 +396,7 @@ class ProjectController extends GetxController {
       return {'success': false, 'message': e.toString()};
     }
   }
+
   //getNotes
   Future<List<dynamic>> getNotes(String projectId, String token) async {
     final url = Uri.parse('$baseUrl/getNotes/$projectId');
@@ -385,8 +426,10 @@ class ProjectController extends GetxController {
       return []; // Return an empty list in case of an error
     }
   }
+
 //rateProject
-  Future<Map<String, dynamic>> rateProject(String projectId, Map<String, dynamic> ratingData, String token) async {
+  Future<Map<String, dynamic>> rateProject(
+      String projectId, Map<String, dynamic> ratingData, String token) async {
     final url = Uri.parse('$baseUrl/rate/$projectId');
     try {
       final response = await http.post(
@@ -399,9 +442,15 @@ class ProjectController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        return {'success': true, 'message': jsonDecode(response.body)['message']};
+        return {
+          'success': true,
+          'message': jsonDecode(response.body)['message']
+        };
       } else {
-        return {'success': false, 'message': jsonDecode(response.body)['message']};
+        return {
+          'success': false,
+          'message': jsonDecode(response.body)['message']
+        };
       }
     } catch (e) {
       Get.snackbar(
@@ -415,5 +464,59 @@ class ProjectController extends GetxController {
     }
   }
 
+  Future<void> addProject({
+    required String title,
+    required String description,
+    required String current_stage,
+    required bool isPublic,
+    required String location,
+    required String category,
+    required String website,
+    required String email,
+    required String summary,
+    required String date,
+    required var imageFile
+  }) async {
 
+    String? token = await tokenController.getToken();
+    final url = Uri.parse('$baseUrl/add');
+    if (token == null || token.isEmpty) {
+      print("Error: Token is null or empty");
+      return null;
+    }
+    String tokenWithPrefix = 'token__$token';
+
+    // Create a multipart request
+    var request = http.MultipartRequest('POST', url);
+
+    // Add headers if needed
+    request.headers['Content-Type'] = 'multipart/form-data';
+    request.headers['token'] = tokenWithPrefix;
+
+    // Add form fields
+    request.fields['title'] = title;
+    request.fields['description'] = description;
+    request.fields['current_stage'] = current_stage;
+    request.fields['isPublic'] =isPublic?'true':'false';
+    request.fields['location'] = location;
+    request.fields['category'] =category;
+    request.fields['website'] = website;
+    request.fields['email'] = email;
+    request.fields['summary'] = summary;
+    request.fields['date'] = date;
+
+    // Add image file
+    request.files.add(imageFile);
+
+    // Send the request
+    var response = await request.send();
+
+    // Check the response status
+    if (response.statusCode < 299) {
+      print('Project added successfully');
+    } else {
+      print('Failed to add project. Status code: ${response.statusCode}');
+      print(response.reasonPhrase);
+    }
+  }
 }

@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
               borderSide: BorderSide.none,
             ),
           )),
-      home: DashboardPage(),
+      home: WelcomeScreen(),
     );
   }
 }

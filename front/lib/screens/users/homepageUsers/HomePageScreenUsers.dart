@@ -128,19 +128,19 @@ class _homepagescreenState extends State<homepagescreen> {
   @override
   void initState() {
     super.initState();
-    fetchLatestCourses(); // استدعاء الدالة لجلب آخر 5 دورات عند بدء الصفحة
+    // fetchLatestCourses(); // استدعاء الدالة لجلب آخر 5 دورات عند بدء الصفحة
   }
 
   Future<void> fetchLatestCourses() async {
-    try {
-      final fetchedCourses = await _coursesController.fetchCourses();
-      setState(() {
-        // الاحتفاظ بأحدث 5 دورات
-        _courses = fetchedCourses.take(5).toList();
-      });
-    } catch (e) {
-      print('Error fetching courses: $e');
-    }
+    // try {
+    //   final fetchedCourses = await _coursesController.;
+    //   setState(() {
+    //     // الاحتفاظ بأحدث 5 دورات
+    //     _courses = fetchedCourses.take(5).toList();
+    //   });
+    // } catch (e) {
+    //   print('Error fetching courses: $e');
+    // }
   }
 ///////////////////////////////////////////
   void _nextProjects() {

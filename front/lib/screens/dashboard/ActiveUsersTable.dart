@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../Welcome/welcome_screen.dart';
 import 'Courses.dart';
 import 'Dashboard.dart';
 import 'FeedbackPage.dart';
@@ -40,6 +41,8 @@ class ActiveUsers extends StatelessWidget {
           _buildMenuItem(context, "المنح", Grantpage()),
           _buildMenuItem(context, "الاشعارات", Notifications()),
           _buildMenuItem(context, "الرسائل", chat()),
+          _buildMenuItem(context, "تسجيل خروج", WelcomeScreen()),
+
 
 
 
