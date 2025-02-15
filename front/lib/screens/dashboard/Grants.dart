@@ -34,20 +34,33 @@ class _GrantpageState extends State<Grantpage> {
 
 
   void addgrant() async {
+    String nameCompany = nameOfCompanyController.text;
+    String nameGrant=nameOfGrantController.text;
+    String Description=descriptionController.text;
+    String Date=DateOfEndoFGrant.text;
     var result = await grantcontroller.addGrant(
-      nameOfCompanyController.text,
-    nameOfGrantController.text,
-    descriptionController.text,
-    DateOfEndoFGrant.text,
+      nameCompany,
+      nameGrant,
+      Description,
+      Date
     );
     nameOfCompanyController.text='';
     nameOfGrantController.text='';
     descriptionController.text='';
     DateOfEndoFGrant.text='';
-    if (result != null && result['success']) {
+    if (result != null ) {
       print("Idea added successfully!");
 
       _showSuccessDialog();
+      grants.add({
+        'nameOfCompany': nameCompany,
+        'nameOfGrant': nameGrant,
+        'description': Description,
+        'DateOfEndoFGrant': Date
+      });
+      setState(() {
+
+      });
     } else {
       print("Failed to add grant: ${result?['message']}");
       Fluttertoast.showToast(
@@ -164,13 +177,22 @@ class _GrantpageState extends State<Grantpage> {
         style: TextStyle(color: Colors.white54),
       ),
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => page),
-        );
-      },
+        if (page is WelcomeScreen) {
+          TokenController tokenController=TokenController();
+          tokenController.logout();
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => page),(route) => false,);
+        }
+        else{
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => page),
+          );
+        }},
     );
   }
+
 
   Widget _buildMainContent(BuildContext context,_fetchGrants) {
     return Center(
@@ -300,7 +322,7 @@ class _GrantpageState extends State<Grantpage> {
                     TextFormField(
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter a name';
+                          return 'يرجى إدخال اسم الشركة';
                         }
                         return null;
                       },
@@ -315,6 +337,12 @@ class _GrantpageState extends State<Grantpage> {
                     ),
                     SizedBox(height: 10),
                     TextFormField(
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'يرجى إدخال اسم المنحة';
+                        }
+                        return null;
+                      },
                       controller: nameOfGrantController,
                       decoration: InputDecoration(
                         hintText: "اسم المنحة",
@@ -326,6 +354,12 @@ class _GrantpageState extends State<Grantpage> {
                     ),
                     SizedBox(height: 10),
                     TextFormField(
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'يرجى إدخال الوصف';
+                        }
+                        return null;
+                      },
                       controller: descriptionController,
                       decoration: InputDecoration(
                         hintText: "الوصف",
@@ -337,6 +371,12 @@ class _GrantpageState extends State<Grantpage> {
                     ),
                     SizedBox(height: 10),
                     TextFormField(
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'يرجى إدخال تاريخ بدء التقديم';
+                        }
+                        return null;
+                      },
                       controller: DateOfEndoFGrant,
                       readOnly: true,
                       onTap: (){
@@ -385,15 +425,15 @@ class _GrantpageState extends State<Grantpage> {
               child: Text("إضافة", style: TextStyle(color: Colors.white)),
               onPressed: () {
                 if(formKey.currentState!.validate()){
-                setState(() {
-                  grants.clear();
-                  _fetchGrants();
-                  addgrant();
+                  setState(() {
+                    grants.clear();
+                    _fetchGrants();
+                    addgrant();
 
-                });
-                Navigator.of(context).pop();
-              }
-                },
+                  });
+                  Navigator.of(context).pop();
+                }
+              },
             ),
             TextButton(
               child: Text("إغلاق", style: TextStyle(color: Colors.white)),
@@ -415,7 +455,7 @@ class GrantTable extends StatefulWidget {
 
 class _GrantTableState extends State<GrantTable> {
 
- // تغيير نوع المتغير
+  // تغيير نوع المتغير
   TokenController token =TokenController();
 
   Future<void> _fetchGrants() async {
@@ -552,4 +592,3 @@ class ProfileCard extends StatelessWidget {
     );
   }
 }
-////////////////////////////////////////////////////////

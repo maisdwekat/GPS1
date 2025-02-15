@@ -51,7 +51,11 @@ class _IdeasInformationScreenState extends State<IdeasInformationScreen> {
       body: ListView(
         children: [
           HeaderScreen(),
-          NavigationBarUsers(scaffoldKey: _scaffoldKey, onSelectContact: (value) {}),
+          NavigationBarUsers(
+            onSelectContact: (value) {
+              _scaffoldKey.currentState!.openDrawer();
+            },
+          ),
           const SizedBox(height: 40),
           _buildProjectCards(),
           const SizedBox(height: 40),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../Controllers/ideaController.dart';
+import '../../Controllers/token_controller.dart';
 import '../Welcome/welcome_screen.dart';
 import 'ActiveUsersTable.dart';
 import 'Courses.dart';
@@ -17,12 +19,17 @@ class IdeasPage extends StatefulWidget {
 }
 
 class _IdeasPageState extends State<IdeasPage> {
-  // قائمة الأفكار بدون استخدام فئة Idea
-  List<Map<String, String>> ideas = [
-    {'owner': 'أحمد محمد', 'email': 'ahmed@example.com'},
-    // يمكنك إضافة المزيد من الأفكار هنا
-  ];
-
+  List<dynamic>? ideas = [];
+  IdeaController idea = IdeaController();
+  getAllForAdmin() async {
+    ideas = await idea.getAllForAdmin();
+    setState(() {});
+  }
+  @override
+  void initState() {
+    getAllForAdmin();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,13 +74,22 @@ class _IdeasPageState extends State<IdeasPage> {
         style: TextStyle(color: Colors.white54),
       ),
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => page),
-        );
-      },
+        if (page is WelcomeScreen) {
+          TokenController tokenController=TokenController();
+          tokenController.logout();
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => page),(route) => false,);
+        }
+        else{
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => page),
+          );
+        }},
     );
   }
+
 
   Widget _buildMainContent(BuildContext context) {
     return Column(
@@ -154,10 +170,10 @@ class _IdeasPageState extends State<IdeasPage> {
           DataColumn(label: Text('البريد الإلكتروني', style: TextStyle(color: Colors.white))),
           DataColumn(label: Text('الإجراءات', style: TextStyle(color: Colors.white))),
         ],
-        rows: ideas.map((idea) {
+        rows: ideas!.map((idea) {
           return DataRow(cells: [
-            DataCell(Text(idea['owner']!, style: TextStyle(color: Colors.white))),
-            DataCell(Text(idea['email']!, style: TextStyle(color: Colors.white))),
+            DataCell(Text(idea['_id']!, style: TextStyle(color: Colors.white))),
+            DataCell(Text(idea['emailContact']!, style: TextStyle(color: Colors.white))),
             DataCell(Row(
               children: [
                 IconButton(
@@ -165,7 +181,7 @@ class _IdeasPageState extends State<IdeasPage> {
                   onPressed: () {
                     setState(() {
                       // حذف الفكرة من القائمة
-                      ideas.remove(idea);
+                      ideas!.remove(idea);
                     });
                   },
                 ),
@@ -175,7 +191,13 @@ class _IdeasPageState extends State<IdeasPage> {
                     // الانتقال إلى صفحة تفاصيل الفكرة
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => IdeaDetailsPage()), // تأكد من تمرير المعطيات إذا لزم الأمر
+                      MaterialPageRoute(builder: (context) => IdeaDetailsPage(
+                        description: idea['description']!,
+                        field: idea['category']!,
+                        email: idea['emailContact']!,
+                        status: idea['isPublic']!,
+
+                      )), // تأكد من تمرير المعطيات إذا لزم الأمر
                     );
                   },
                 ),

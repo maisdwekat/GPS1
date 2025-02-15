@@ -93,13 +93,30 @@ class CoursesController {
 
 
   //deleteCourse
-  Future<void> deleteCourse(String id) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/delete/$id'),
-    );
-
-    if (response.statusCode != 204) {
-      throw Exception('فشل في حذف الدورة');
+  Future<bool> deleteCourse(String grantid) async {
+    final savedToken =await token.getToken();
+    if (savedToken == null || savedToken.isEmpty) {
+      print("Error: Token is null or empty");
+      return true;
     }
+    String tokenWithPrefix = 'token__$savedToken';
+
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/delete/$grantid'),
+        headers: {'Content-Type': 'application/json',
+          'token': tokenWithPrefix,},
+      );
+
+      if (response.statusCode == 200) {
+        return false;
+      } else {
+        print('Failed to delete grant: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
+    return true; // في حالة الفشل
   }
+
 }

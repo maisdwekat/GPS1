@@ -1,20 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:ggg_hhh/Widget/bmc_widget.dart';
 
 class ProjectDetailsPage extends StatelessWidget {
   // استخدم قيم افتراضية
-  final String projectName = 'اسم المشروع غير متوفر';
-  final String projectField = 'مجال المشروع غير متوفر';
-  final String creationDate = 'تاريخ الإنشاء غير متوفر';
-  final String city = 'المدينة غير متوفرة';
-  final String currentPhase = 'المرحلة الحالية غير متوفرة';
-  final String description = 'لا يوجد وصف متاح';
-  final String website = 'غير متوفر';
-  final String email = 'غير متوفر';
-  final String projectImageUrl = 'https://via.placeholder.com/200'; // صورة افتراضية
-  final String businessModelImageUrl = 'https://via.placeholder.com/200'; // صورة افتراضية
-  final String summary = 'ملخص المشروع غير متوفر';
-  final String projectStatus = 'خاص'; // أو 'عام'
-
+  final String projectId;
+  final String owner;
+  final String projectName ;
+  final String projectField ;
+  final String creationDate ;
+  final String city;
+  final String currentPhase ;
+  final String description;
+  final String website ;
+  final String email ;
+  final String projectImageUrl; // صورة افتراضية
+  final String summary ;
+  final bool projectStatus ; // أو 'عام'
+  ProjectDetailsPage({Key? key,
+    required this.projectId,
+    required this.owner,
+    required this.projectName,
+    required this.projectField,
+    required this.creationDate,
+    required this.city,
+    required this.currentPhase,
+    required this.description,
+    required this.website,
+    required this.email,
+    required this.projectImageUrl,
+    required this.summary,
+    required this.projectStatus,
+  }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,7 +112,7 @@ class ProjectDetailsPage extends StatelessWidget {
                 Image.network(
                   projectImageUrl,
                   height: 200,
-                  width: double.infinity,
+                  width: 400,
                   fit: BoxFit.cover,
                 ),
                 SizedBox(height: 4.0), // مساحة بين الصورة والجملة
@@ -111,12 +127,13 @@ class ProjectDetailsPage extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Image.network(
-                  businessModelImageUrl,
-                  height: 200,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
+                BmcWidget.pre(id: projectId),
+                // Image.network(
+                //   businessModelImageUrl,
+                //   height: 200,
+                //   width: double.infinity,
+                //   fit: BoxFit.cover,
+                // ),
                 SizedBox(height: 4.0), // مساحة بين الصورة والجملة
                 Text(
                   'صورة نموذج العمل',

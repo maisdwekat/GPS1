@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../Controllers/ProjectController.dart';
 import '../../../../basic/footer.dart';
 import '../../../../basic/header.dart';
 import '../../Drawerinvestor/Drawerinvestor.dart';
@@ -15,11 +16,26 @@ class ProjectsScreen extends StatefulWidget {
 class _ProjectsScreenState extends State<ProjectsScreen> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  ProjectController projectController = ProjectController();
 
   bool _isSearchVisible = false; // للتحكم في ظهور قائمة البحث
   String? _selectedCity;
   String? _selectedField;
   String? _selectedStage;
+  final List<dynamic> projects = [];
+  getProjects() async {
+    await projectController.getAllProjects().then((value) => projects.addAll(value));
+    setState(() {
+
+    });
+  }
+  @override
+  void initState() {
+    print('must be working ');
+    getProjects();
+    super.initState();
+  }
+
   final List<String> cities = ['نابلس', 'جنين', 'قلقيلية', 'رام الله', 'طولكرم'];
   final List<String> fields = [
     'تعليمي',
@@ -57,38 +73,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
     'مرحلة تأسيس الفريق والموارد',
     'مرحلة الاطلاق والنمو'
   ];
-  final List<Map<String, String>> projects = [
-    {
-      'title': 'حلول الزراعة الذكية',
-      "description": "مشروع يهدف إلى تحسين تقنيات الزراعة.\nنركز على استخدام التكنولوجيا لزيادة الإنتاجية.",
-      'image': 'assets/images/p1 (1).jpeg',
-    },
-    {
-      'title': 'تطوير التطبيقات الذكية',
-      "description": "مشروع لتطوير تطبيقات الذكاء الاصطناعي.\nنقدم حلولاً مبتكرة لتحسين الكفاءة.",
-      'image': 'assets/images/p1 (6).jpeg',
-    },
-    {
-      'title': 'تعليم مبتكر',
-      "description": "مشروع للابتكار في مجال التعليم.\nنهدف إلى تعزيز تجربة التعلم باستخدام التكنولوجيا.",
-      'image': 'assets/images/p1 (5).jpeg',
-    },
-    {
-      'title': 'Sustainable Travel Solutions',
-      "description": "مشروع لتنمية السياحة المستدامة.\nنركز على الحفاظ على البيئة وتعزيز الثقافة المحلية.",
-      'image': 'assets/images/p1 (4).jpeg',
-    },
-    {
-      'title': 'الطاقة الخضراء',
-      "description": "مشروع لتطوير الطاقة المتجددة.\nنركز على توفير حلول طاقة نظيفة ومستدامة.",
-      'image': 'assets/images/p1 (3).jpeg',
-    },
-    {
-      'title': 'مختبر الابتكارات التكنولوجية',
-      "description": "مشروع لتطوير حلول تكنولوجيا المعلومات.\nنركز على تقديم خدمات متكاملة للشركات.",
-      'image': 'assets/images/p1 (2).jpeg',
-    },
-  ];
+
 
   @override
   Widget build(BuildContext context) {
@@ -324,7 +309,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
     );
   }
 
-  Widget _buildProjectCard(Map<String, String> project) {
+  Widget _buildProjectCard(dynamic project) {
     return Container(
       width: 300,
       // عرض المربع
@@ -348,7 +333,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
           // الصورة
           ClipRRect(
             borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-            child: Image.asset(
+            child: Image.network(
               project['image']!,
               width: double.infinity,
               height: 200, // ارتفاع الصورة

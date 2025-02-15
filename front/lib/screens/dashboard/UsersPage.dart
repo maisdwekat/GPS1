@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../Controllers/date_controller.dart';
+import '../../Controllers/token_controller.dart';
+import '../../Controllers/user_to_Admin_controller.dart';
+import '../../models/user_model.dart';
 import '../Welcome/welcome_screen.dart';
 import 'ActiveUsersTable.dart';
 import 'Courses.dart';
@@ -16,11 +20,28 @@ class UsersPage extends StatefulWidget {
 }
 
 class _UsersPageState extends State<UsersPage> {
-  final List<User> users = [
-    User(name: 'أحمد', email: 'ahmed@example.com', role: 'مستثمر', status: 'نشط'),
-    User(name: 'فاطمة', email: 'fatima@example.com', role: 'مستخدم', status: 'غير نشط'),
-    // يمكنك إضافة المزيد من المستخدمين هنا
-  ];
+  UserToAdminController userToAdminController = UserToAdminController();
+  List<User> users = [];
+
+  getUsers() async {
+    List<dynamic>? fetchingUsers=await userToAdminController.getUsers();
+    if(fetchingUsers!=null){
+
+      users=fetchingUsers.map((e) => User.fromJson(e),).toList();
+      users=users.where((element) => element.role!="admin").toList();
+      print(users);
+
+      setState(() {
+
+      });
+
+    }
+  }
+  @override
+  void initState() {
+    getUsers();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,13 +87,22 @@ class _UsersPageState extends State<UsersPage> {
         style: TextStyle(color: Colors.white54),
       ),
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => page),
-        );
-      },
+        if (page is WelcomeScreen) {
+          TokenController tokenController=TokenController();
+          tokenController.logout();
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => page),(route) => false,);
+        }
+        else{
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => page),
+          );
+        }},
     );
   }
+
 
   Widget _buildMainContent(BuildContext context) {
     return Column(
@@ -151,24 +181,16 @@ class _UsersPageState extends State<UsersPage> {
           DataColumn(label: Text('اسم المستخدم', style: TextStyle(color: Colors.white))),
           DataColumn(label: Text('البريد الإلكتروني', style: TextStyle(color: Colors.white))),
           DataColumn(label: Text('الفئة', style: TextStyle(color: Colors.white))),
-          DataColumn(label: Text('الحالة', style: TextStyle(color: Colors.white))),
-          DataColumn(label: Text('الإجراءات', style: TextStyle(color: Colors.white))), // عمود الإجراءات
+          DataColumn(label: Text('الفئة', style: TextStyle(color: Colors.white))),
+
         ],
         rows: users.map((user) {
           return DataRow(cells: [
             DataCell(Text(user.name, style: TextStyle(color: Colors.white))),
             DataCell(Text(user.email, style: TextStyle(color: Colors.white))),
             DataCell(Text(user.role, style: TextStyle(color: Colors.white))),
-            DataCell(Text(user.status, style: TextStyle(color: user.status == 'نشط' ? Colors.green : Colors.red))),
-            DataCell(IconButton(
-              icon: Icon(Icons.delete, color: Colors.red),
-              onPressed: () {
-                setState(() {
-                  // حذف المستخدم من القائمة
-                  users.remove(user);
-                });
-              },
-            )),
+            DataCell(Text(user.lastLogin==null?"لا يوجد":dateFormater(user.lastLogin!), style: TextStyle(color: Colors.white))),
+
           ]);
         }).toList(),
       ),
@@ -176,14 +198,6 @@ class _UsersPageState extends State<UsersPage> {
   }
 }
 
-class User {
-  String name;
-  String email;
-  String role;
-  String status;
-
-  User({required this.name, required this.email, required this.role, required this.status});
-}
 
 class ProfileCard extends StatelessWidget {
   @override

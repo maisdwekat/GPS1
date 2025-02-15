@@ -10,27 +10,30 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-   ChatController chatController = ChatController(); // إنشاء كائن من ChatController
-    List<dynamic> messages=[];
+  ChatController chatController =
+      ChatController(); // إنشاء كائن من ChatController
+  List<dynamic> messages = [];
 
-   getMessages() async {
-     await chatController.getMessages();
-     setState(() {
-       messages = chatController.messages;
-     });
+  getMessages() async {
+    await chatController.getMessages();
+    setState(() {
+      messages = chatController.messages;
+    });
+  }
 
-   } sendMessages(String massageText) async {
-     await chatController.sendMessage(massageText);
-     setState(() {
-       messages = chatController.messages;
-     });
+  sendMessages(String massageText) async {
+    await chatController.sendMessage(massageText);
+    setState(() {
+      messages = chatController.messages;
+    });
+  }
 
-   }
   @override
   void initState() {
     getMessages();
     super.initState();
   }
+
   final TextEditingController _messageController = TextEditingController();
   bool hasWelcomed = false;
 
@@ -95,37 +98,57 @@ class _ChatScreenState extends State<ChatScreen> {
               itemCount: messages.length,
               itemBuilder: (context, index) {
                 final message = messages[index];
-                final isUserMessage = message['sender'] == 'user';
+                final isUserMessage = message['senderRole'] == 'user';
 
                 return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
-                  child: Row(
-                    mainAxisAlignment: isUserMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 4.0, horizontal: 16.0),
+                  child: Column(
                     children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: isUserMessage ? Colors.orange : Colors.grey[300],
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        padding: EdgeInsets.all(12.0),
-                        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
-                        child: Column(
-                          crossAxisAlignment: isUserMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              message['message'] ?? '',
-                              style: TextStyle(color: Colors.black),
-                              textAlign: TextAlign.start,
-                              maxLines: null,
-                              overflow: TextOverflow.visible,
+                      Row(
+                        mainAxisAlignment: isUserMessage
+                            ? MainAxisAlignment.end
+                            : MainAxisAlignment.start,
+                        children: [
+                          Text(isUserMessage ? 'انت' : 'الأدمن'),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: isUserMessage
+                            ? MainAxisAlignment.end
+                            : MainAxisAlignment.start,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(8.0),
                             ),
-                            SizedBox(height: 5),
-                            Text(
-                              message['time'] ?? '',
-                              style: TextStyle(fontSize: 12, color: Colors.grey),
+                            padding: EdgeInsets.all(12.0),
+                            constraints: BoxConstraints(
+                                maxWidth:
+                                    MediaQuery.of(context).size.width * 0.75),
+                            child: Column(
+                              crossAxisAlignment: isUserMessage
+                                  ? CrossAxisAlignment.end
+                                  : CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  message['message'] ?? '',
+                                  style: TextStyle(color: Colors.black),
+                                  textAlign: TextAlign.start,
+                                  maxLines: null,
+                                  overflow: TextOverflow.visible,
+                                ),
+                                SizedBox(height: 5),
+                                Text(
+                                  message['time'] ?? '',
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.grey),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -152,7 +175,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.send, color: Colors.white),
-                  onPressed: (){
+                  onPressed: () {
                     sendMessages(_messageController.text);
                     _messageController.clear();
                   },

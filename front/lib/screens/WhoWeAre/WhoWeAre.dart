@@ -28,9 +28,8 @@ class _WhoWeAreScreenState extends State<WhoWeAreScreen> {
           children: [
             HeaderScreen(), // استدعاء الهيدر
             NavigationBarUsers(
-              scaffoldKey: _scaffoldKey,
               onSelectContact: (value) {
-                // منطق لتحديد جهة الاتصال
+                _scaffoldKey.currentState!.openDrawer();
               },
             ),
             const SizedBox(height: 40),

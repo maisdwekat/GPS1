@@ -1,5 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/snackbar/snackbar.dart';
 import 'package:ggg_hhh/Controllers/token_controller.dart';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -143,6 +146,7 @@ class IdeaController {
 
         Map<String, dynamic> ideas = {
           '_id': responseData['getIdeas']['_id'],
+          'ownerId': responseData['getIdeas']['createdBy']['_id'],
           'description': responseData['getIdeas']['description'],
           'emailContact': responseData['getIdeas']['emailContact'],
           'isPublic': responseData['getIdeas']['isPublic'],
@@ -216,13 +220,13 @@ class IdeaController {
     return [];
   }
 
-  // تحديث فكرة بواسطة المعرف
-  Future<String?> updateIdea(
-      String ideaId, String description, bool isPublic, String category) async {
+
+  Future<Map<String, dynamic>?> updateIdea(
+      String description, bool isPublic, String category, String ideaId) async {
     final savedToken = await token.getToken();
     if (savedToken == null || savedToken.isEmpty) {
       print("Error: Token is null or empty");
-      return "Authentication token is missing";
+      return {'success': false, 'message': "Authentication token is missing"};
     }
     String tokenWithPrefix = 'token__$savedToken';
     print("token: ${tokenWithPrefix}");
@@ -230,27 +234,36 @@ class IdeaController {
     try {
       final response = await http.patch(
         Uri.parse('$baseUrl/update/$ideaId'),
-        headers: {'Content-Type': 'application/json',
-        'token': tokenWithPrefix,
+        headers: {
+          'Content-Type': 'application/json',
+          'token': tokenWithPrefix,
         },
         body: json.encode({
           'description': description,
           'isPublic': isPublic,
-          'categrory': category,
+          'category': category,
         }),
       );
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+      final responseData = json.decode(response.body);
 
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        return responseData['message'];
+      if (response.statusCode == 200 && responseData.containsKey('saveIdea')) {
+        return {'success': true, 'message': "Idea added successfully!"};
       } else {
-        print('Failed to update idea: ${response.statusCode}');
+        return {
+          'success': false,
+          'message': responseData['message'] ?? "Failed to add idea"
+        };
       }
     } catch (error) {
       print('Error: $error');
+      return {'success': false, 'message': "An error occurred"};
     }
     return null;
   }
+
+
 
   // الحصول على جميع التعليقات لفكرة معينة
   Future<List<dynamic>?> getAllComments(String ideaId) async {
@@ -301,23 +314,55 @@ class IdeaController {
     return true; // في حالة الفشل
   }
 
-  // حذف فكرة بواسطة معرفها
-  Future<bool> deleteIdea(String ideaId) async {
+
+  // deleteIdea
+  Future<void> deleteIdea(String ideaId) async {
+    final url = Uri.parse('$baseUrl/deleteIdea/$ideaId');
+    final savedToken = await token.getToken();
+    if (savedToken == null || savedToken.isEmpty) {
+      print("Error: Token is null or empty");
+      return null;
+    }
+    Map<String, dynamic> decodedToken = JwtDecoder.decode(savedToken);
+    print("Decoded Token: $decodedToken");
+    String userId = decodedToken['id'];
+    print("User ID: $userId");
+    String tokenWithPrefix = 'token__$savedToken';
+    print("Token: $tokenWithPrefix");
     try {
       final response = await http.delete(
-        Uri.parse('$baseUrl/deleteIdea/$ideaId'),
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          'token': tokenWithPrefix,
+        },
       );
 
       if (response.statusCode == 200) {
-        return true;
+        // update(); // الآن تعمل لأن الفئة تمتد من GetxController
+        Get.snackbar(
+          'Success',
+          'Project deleted successfully',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
       } else {
-        print('Failed to delete idea: ${response.statusCode}');
+        throw Exception('Failed to delete the project');
       }
-    } catch (error) {
-      print('Error: $error');
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Could not delete the project: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
-    return false;
   }
+
+
+
 
   // الحصول على الأفكار الموصى بها
   Future<List<dynamic>?> getRecommendedIdeas() async {
@@ -463,4 +508,53 @@ class IdeaController {
     }
     return null;
   }
+  // الحصول على جميع الأفكار للادمن
+  Future<List<dynamic>?> getAllForAdmin() async {
+    print("getAllForAdmin() called");
+    final savedToken = await token.getToken(); // تأكد من وجود دالة _getToken
+    if (savedToken == null || savedToken.isEmpty) {
+      print("Error: Token is null or empty");
+      return null;
+    }
+    Map<String, dynamic> decodedToken = JwtDecoder.decode(savedToken);
+    print("Decoded Token: $decodedToken");
+    String tokenWithPrefix = 'token__$savedToken';
+    print("Token: $tokenWithPrefix");
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/getAllForAdmin'),
+        headers: {
+          'Content-Type': 'application/json',
+          'token': tokenWithPrefix,
+        },
+      );
+      print("Sent Request");
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        List<dynamic> ideas = (responseData['getIdeas'] as List)
+            .map((idea) => {
+          '_id': idea['_id'],
+          'emailContact': idea['emailContact'],
+          'category': idea['category'],
+          'description': idea['description'],
+          'isPublic': idea['isPublic'],
+        })
+            .toList();
+        print(
+            'Successfully fetched ideas: ${responseData['ideas']}'); // طباعة الأفكار المسترجعة
+        print('Successfully fetched ideas: $ideas');
+        return ideas; // Assuming the response contains a key 'ideas'
+      } else {
+        print(
+            'Failed to fetch ideas: ${response.statusCode}'); // طباعة رسالة عند الفشل
+        return null; // أو معالجة الخطأ حسب الحاجة
+      }
+    } catch (error) {
+      print('Error: $error'); // طباعة أي خطأ قد يحدث
+      return null; // أو معالجة الخطأ حسب الحاجة
+    }
+  }
+
 }

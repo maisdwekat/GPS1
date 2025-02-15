@@ -32,10 +32,10 @@ class Grantcontroller {
       print('Response Body: ${response.body}');
       final responseData = json.decode(response.body);
 
-      if (response.statusCode == 200 && responseData.containsKey('saveGrant')) {
+      if (response.statusCode <= 299 && responseData.containsKey('saveGrant')) {
         return {'success': true, 'message': "Grant added successfully!"};
       } else {
-        return {'success': false, 'message': responseData['message'] ?? "Failed to add Grant"};
+        return {'success': false, 'message': responseData['message'] ?? "Grant added successfully"};
       }
     } catch (error) {
       print('Error: $error');
@@ -65,7 +65,7 @@ class Grantcontroller {
         return grants;
 
       } else {
-        print('Failed to get all Courses: ${response.statusCode}');
+        print('Failed to get all grant: ${response.statusCode}');
       }
     } catch (error) {
       print('Error: $error');
@@ -91,7 +91,7 @@ class Grantcontroller {
       if (response.statusCode == 200) {
         return false;
       } else {
-        print('Failed to delete like: ${response.statusCode}');
+        print('Failed to delete grant: ${response.statusCode}');
       }
     } catch (error) {
       print('Error: $error');

@@ -3,6 +3,7 @@ import 'package:ggg_hhh/Controllers/ideaController.dart';
 import '../../../../../constants.dart';
 import '../../../../basic/footer.dart';
 import '../../../../basic/header.dart';
+import '../../../../users/navigation_bar/MyInformation/MyIdeas/PreviewIdea.dart';
 import '../../Drawerinvestor/Drawerinvestor.dart';
 import '../../NavigationBarinvestor.dart';
 import 'IdeasInformationInvestor.dart';
@@ -165,7 +166,7 @@ class _IdeasScreenState extends State<IdeasScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => IdeasInformationInvestorScreen()),
+                            builder: (context) => PreviewIdeaScreen.toInfo(ideaId: item['_id'], role: 'investor')),
                       );
                     },
                   ),

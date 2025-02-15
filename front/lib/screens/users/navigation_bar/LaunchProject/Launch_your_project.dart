@@ -29,9 +29,8 @@ class _LaunchProjectScreenState extends State<LaunchProjectScreen> {
           children: [
             HeaderScreen(), // استدعاء الهيدر
             NavigationBarUsers(
-              scaffoldKey: _scaffoldKey,
               onSelectContact: (value) {
-                // منطق لتحديد جهة الاتصال
+                _scaffoldKey.currentState!.openDrawer();
               },
             ),
             const SizedBox(height: 40),

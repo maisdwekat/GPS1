@@ -1,4 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:ggg_hhh/Controllers/date_controller.dart';
+import '../../Controllers/token_controller.dart';
+import '../../Controllers/user_to_Admin_controller.dart';
+import '../../Widget/admin/sidebar.dart';
+import '../../models/user_model.dart';
 import '../Welcome/welcome_screen.dart';
 import 'Courses.dart';
 import 'Dashboard.dart';
@@ -10,59 +17,47 @@ import 'ProjectsPage.dart';
 import 'UsersPage.dart';
 import 'chatscreen.dart';
 
-class ActiveUsers extends StatelessWidget {
+class ActiveUsers extends StatefulWidget {
+  @override
+  State<ActiveUsers> createState() => _ActiveUsersState();
+}
+
+class _ActiveUsersState extends State<ActiveUsers> {
+ List<User> users = [];
+ UserToAdminController userToAdminController = UserToAdminController();
+
+ getUsers() async {
+   List<dynamic>? fetchingUsers=await userToAdminController.getUsers();
+   if(fetchingUsers!=null){
+
+     users=fetchingUsers.map((e) => User.fromJson(e),).toList();
+     users.removeWhere((element) => element.lastLogin==null,);
+     users.removeWhere((element) => element.role=="admin",);
+     users.sort((User a, User b) => b.lastLogin!.compareTo(a.lastLogin!));
+
+     setState(() {
+
+     });
+
+   }
+ }
+
+  @override
+  void initState() {
+    getUsers();
+
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFF2B2B2B), // تغيير لون الخلفية هنا
       body: Row(
         children: [
-          _buildSidebar(context),
+          Sidebar(),
           Expanded(child: _buildMainContent(context)),
         ],
       ),
-    );
-  }
-
-  Widget _buildSidebar(BuildContext context) {
-    return Container(
-      width: 250,
-      color: Color(0xFF4A4A4A),
-      child: Column(
-        children: [
-          SizedBox(height: 70),
-          _buildMenuItem(context, "لوحة التحكم", DashboardPage()),
-          _buildMenuItem(context, "المستخدمون", UsersPage()),
-          _buildMenuItem(context, "المشاريع", ProjectsPage()),
-          _buildMenuItem(context, "الأفكار", IdeasPage()),
-          _buildMenuItem(context, "الدورات", Courses()),
-          _buildMenuItem(context, "أكثر المستخدمين نشاطًا", ActiveUsers()),
-          _buildMenuItem(context, "الفيد باك", FeedbackPage()),
-          _buildMenuItem(context, "المنح", Grantpage()),
-          _buildMenuItem(context, "الاشعارات", Notifications()),
-          _buildMenuItem(context, "الرسائل", chat()),
-          _buildMenuItem(context, "تسجيل خروج", WelcomeScreen()),
-
-
-
-
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMenuItem(BuildContext context, String title, Widget page) {
-    return ListTile(
-      title: Text(
-        title,
-        style: TextStyle(color: Colors.white54),
-      ),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => page),
-        );
-      },
     );
   }
 
@@ -74,7 +69,7 @@ class ActiveUsers extends StatelessWidget {
         Expanded(
           child: Row(
             children: [
-              Expanded(child: UserActivityTable()), // عرض جدول النشاط
+              Expanded(child: UserActivityTable(users: users,)), // عرض جدول النشاط
               _buildUserActivityBoxes(), // عرض مربعات النشاط
             ],
           ),
@@ -178,6 +173,8 @@ class ActiveUsers extends StatelessWidget {
 }
 
 class UserActivityTable extends StatelessWidget {
+  final List<User> users;
+  UserActivityTable({Key? key, required this.users}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -202,11 +199,15 @@ class UserActivityTable extends StatelessWidget {
                 DataColumn(label: Container(width: 150, child: Text("تاريخ آخر نشاط", style: TextStyle(color: Colors.white)))),
                 DataColumn(label: Container(width: 100, child: Text("مستوى النشاط", style: TextStyle(color: Colors.white)))),
               ],
-              rows: [
-                _createRow("مستخدم 1", "user1@example.com", 20, "2024-12-01", "نشط"),
-                _createRow("مستخدم 2", "user2@example.com", 15, "2024-12-02", "متوسط"),
-                _createRow("مستخدم 3", "user3@example.com", 5, "2024-12-03", "قليل"),
-              ],
+              rows: users.map((user) {
+                return _createRow(user.name, user.email, 20, dateFormater(user.lastLogin!), "نشط");
+              }).toList(),
+              // [
+              //   _createRow("مستخدم 1", "user1@example.com", 20, "2024-12-01", "نشط"),
+              //   _createRow("مستخدم 2", "user2@example.com", 15, "2024-12-02", "متوسط"),
+              //   _createRow("مستخدم 3", "user3@example.com", 5, "2024-12-03", "قليل"),
+              // ],
+
             ),
           ),
         ),

@@ -6,6 +6,8 @@ import '../../LaunchProject/Stages/Stage2.dart';
 import 'MyStartupProjects.dart'; // تأكد من استيراد ملف الثوابت
 
 class BMCformscreen extends StatefulWidget {
+  String id;
+  BMCformscreen({required this.id});
   @override
   _BMCformscreenState createState() => _BMCformscreenState();
 }
@@ -30,7 +32,7 @@ class _BMCformscreenState extends State<BMCformscreen> {
           ),
         ),
         body:
-        BmcWidget(),
+        BmcWidget(id: widget.id,),
       ),
     );
   }

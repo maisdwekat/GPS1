@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:ggg_hhh/screens/investor/navigation_bar_investor/Drawerinvestor/Drawerinvestor.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 import '../../../../../Controllers/ideaController.dart';
 import '../../../../../Controllers/token_controller.dart';
+import '../../../../../Widget/user_information_header.dart';
 import '../../../../../constants.dart';
 import '../../../../ChatForInquiries/ChatForInquiries.dart';
+import '../../../../basic/header.dart';
+import '../../../../investor/navigation_bar_investor/NavigationBarinvestor.dart';
+import '../../DrawerUsers/DrawerUsers.dart';
+import '../../NavigationBarUsers.dart';
 import '../MyAccount.dart';
 import 'MyIdeas.dart';
 import '../MyStartupProjects/MyStartupProjects.dart';
@@ -14,17 +20,27 @@ class PreviewIdeaScreen extends StatefulWidget {
   @override
   _PreviewIdeaScreenState createState() => _PreviewIdeaScreenState();
   final String ideaId;
+  bool isToInformation = false;
+  String? role;
 
-  const PreviewIdeaScreen({super.key, required this.ideaId});
+  PreviewIdeaScreen({super.key, required this.ideaId});
+
+  PreviewIdeaScreen.toInfo(
+      {super.key,
+      required this.ideaId,
+      this.isToInformation = true,
+      required this.role});
 }
 
 class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
   final IdeaController _ideaController = IdeaController();
   TokenController tokenController = TokenController();
 
+  final List<Map<String, dynamic>> _comments = [];
 
   String? _id;
   String? _description;
+  String ? _ownarIdeaId;
   String? _emailContact;
   bool? _isPublic;
   String? _category;
@@ -32,30 +48,27 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
   // Map<String, dynamic>? _createdBy;
   String? _createdBy;
 
-  List<dynamic> _comments = [];
+  List<dynamic> _comment = [];
   List<dynamic> _likesCommentList = [];
   List<dynamic> likesForIdeaList = [];
-  int ideaLikesLength=0;
-  bool isLikedIdea=false;
+  int ideaLikesLength = 0;
+  bool isLikedIdea = false;
 
   Future<void> getLikes() async {
-   List<dynamic> likes = await _ideaController.getAllLikes(widget.ideaId);
-   likesForIdeaList=likes.map((like) => like['createdBy']['_id']).toList();
-   if(likesForIdeaList.isNotEmpty) {
-   if(likesForIdeaList.contains(userid)) {
-     isLikedIdea=true;
-   }
-    print('the problem is here');
-    print(likesForIdeaList.toString());
-    print('the problem is here');
-
-
+    List<dynamic> likes = await _ideaController.getAllLikes(widget.ideaId);
+    likesForIdeaList = likes.map((like) => like['createdBy']['_id']).toList();
+    if (likesForIdeaList.isNotEmpty) {
+      if (likesForIdeaList.contains(userid)) {
+        isLikedIdea = true;
+      }
+      print('the problem is here');
+      print(likesForIdeaList.toString());
+      print('the problem is here');
 
       setState(() {
         ideaLikesLength = likesForIdeaList.length;
       });
     }
-
   }
 
   List<Map<String, dynamic>> _likes = [];
@@ -70,11 +83,12 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
         // تخزين القيم القادمة من getIdea
         // _id = widget.ideaId;
         _description = ideas['description'];
+        _ownarIdeaId = ideas['ownerId'];
         _emailContact = ideas['emailContact'];
         _isPublic = ideas['isPublic'];
         _category = ideas['category'];
         _createdBy = ideas['createdBy']['name'];
-        _comments = List<Map<String, dynamic>>.from(ideas['comments']);
+        _comment = List<Map<String, dynamic>>.from(ideas['comments']);
         _likes = List<Map<String, dynamic>>.from(ideas['likes']);
         _createdAt = ideas['createdAt'];
       });
@@ -90,7 +104,7 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
 
 // طباعة التعليقات (comments)
       print('Comments:');
-      _comments.forEach((comment) {
+      _comment.forEach((comment) {
         _comments.add(comment);
         // print('Comment ID: ${comment['_id']}');
         print('Comment Content: ${comment['content']}');
@@ -122,9 +136,7 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
     }
   }
 
-
   // تعريف projectData هنا
-
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isHoveringAbout = false;
@@ -137,37 +149,17 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
     'isLiked': false,
   };
 
-  String _profileImage = ''; // متغير لتخزين مسار الصورة
-  String _displayedText = ''; // المتغير لتخزين النص المعروض
-  String? _displayedImagePath; // المتغير لتخزين مسار الصورة المعروضة
-
-  Future<void> _pickImage() async {
-    final ImagePicker _picker = ImagePicker();
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        _profileImage = image.path; // تحديث مسار الصورة
-      });
-    }
-  }
-
   String? userid;
-  getUserId() async{
-    String? savedToken =await tokenController.getToken();
-    var user = tokenController.decodedToken(savedToken);
-    userid= user['id'];
 
-  }
-
-  void _updateContent(String title, {String? imagePath}) {
-    setState(() {
-      _displayedText = title;
-      _displayedImagePath = imagePath;
-    });
+  getUserId() async {
+    String? savedToken = await tokenController.getToken();
+    var user = tokenController.decodedToken(savedToken!);
+    userid = user['id'];
   }
 
   @override
   void initState() {
+    print(widget.role)  ;
     super.initState();
 
     getUserId();
@@ -176,35 +168,67 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
     getLikes();
     print('Likes################################');
     print("user id is $userid");
-
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
+      drawer: widget.role == null
+          ? null
+          : widget.role == 'user'
+              ? DrawerUsers(scaffoldKey: _scaffoldKey)
+              : Drawerinvestor(scaffoldKey: _scaffoldKey),
       appBar: AppBar(
         backgroundColor: Color(0xFF0A1D47),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        leading: widget.role == null
+            ? IconButton(
+                icon: Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              )
+            : null,
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _buildHeader(),
-            _buildProfileSection(),
-            _buildHorizontalLine(),
-            _buildNavigationBar(),
-            _buildHorizontalLine(),
+            widget.role == null ?  _buildHeader(): HeaderScreen(),
+
+            widget.role == null
+                ? SizedBox()
+                : widget.role == 'user'
+                    ? NavigationBarUsers(
+              onSelectContact: (value) {
+                print('Scaffold State: ${_scaffoldKey.currentState}');
+                _scaffoldKey.currentState!.openDrawer();
+              },
+            )
+                    : NavigationBarinvestor(
+                        scaffoldKey: _scaffoldKey, onSelectContact: (value) {}),
+
+            widget.role == null ? UserInformationHeader(): SizedBox(),
+            widget.role == null ? _buildHorizontalLine() : SizedBox(),
+            widget.role == null ? _buildNavigationBar() : SizedBox(),
+            widget.role == null ? _buildHorizontalLine() : SizedBox(),
             SizedBox(height: 40),
             _buildProjectCards(),
             SizedBox(height: 100), // يمكنك تغيير القيمة حسب الحاجة
           ],
         ),
       ),
+    );
+  }
+
+  fullWidget() {
+    return Column(
+      children: [
+        _buildHeader(),
+        UserInformationHeader(),
+        _buildHorizontalLine(),
+        _buildNavigationBar(),
+        _buildHorizontalLine(),
+      ],
     );
   }
 
@@ -215,42 +239,6 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
     );
   }
 
-  Widget _buildProfileSection() {
-    return Container(
-      color: Colors.grey[200],
-      padding: EdgeInsets.all(10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Text(
-            'اسم الشخص',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(width: 10),
-          GestureDetector(
-            onTap: _pickImage,
-            child: Stack(
-              alignment: Alignment.bottomRight,
-              children: [
-                CircleAvatar(
-                  radius: 80,
-                  backgroundImage: _profileImage.isNotEmpty
-                      ? FileImage(File(_profileImage))
-                      : const AssetImage('assets/images/defaultpfp.jpg')
-                  as ImageProvider,
-                  child: _profileImage.isEmpty
-                      ? const Icon(Icons.camera_alt,
-                      size: 30, color: Colors.grey)
-                      : null,
-                ),
-                const Icon(Icons.edit, color: Color(0xFF0A1D47)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildHorizontalLine() {
     return Container(
@@ -378,8 +366,8 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
                   color: isAbout
                       ? (_isHoveringAbout ? Colors.orange : Color(0xFF0A1D47))
                       : (_isHoveringComments
-                      ? Colors.orange
-                      : Color(0xFF0A1D47)),
+                          ? Colors.orange
+                          : Color(0xFF0A1D47)),
                 ),
               ),
               SizedBox(height: 5),
@@ -410,10 +398,7 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
       alignment: Alignment.bottomRight,
       child: Container(
         constraints:
-        BoxConstraints(maxWidth: MediaQuery
-            .of(context)
-            .size
-            .width * 0.5),
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.5),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
@@ -467,10 +452,7 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
   Widget _buildCommentList() {
     return Expanded(
       child: Container(
-        width: MediaQuery
-            .of(context)
-            .size
-            .width * 0.5,
+        width: MediaQuery.of(context).size.width * 0.5,
         padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -479,33 +461,32 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
         ),
         child: _comments.isNotEmpty
             ? ListView.builder(
-          itemCount: _comments.length,
-          itemBuilder: (context, index) {
-            var commentData = _comments[index];
-            var likesComentlist=commentData['likes'].map((like) => like['_id']).toList();
+                itemCount: _comments.length,
+                itemBuilder: (context, index) {
+                  var commentData = _comments[index];
 
-            return _buildCommentItem(
-              comment: commentData['content']!,
-              commentId: commentData['_id']!,
-               isLiked:likesComentlist.contains({ userid.toString()},) ,
-              Likes:_likesCommentList,
-              userImageUrl:"assets/images/defaultpfp.jpg" ,
+                  return _buildCommentItem(
+                    comment: commentData['content']!,
+                    commentId: commentData['_id']!,
+                    isLiked: _likesCommentList.contains(
+                      {"_id": userid.toString()},
+                    ),
+                    Likes: _likesCommentList,
+                    userImageUrl: "assets/images/defaultpfp.jpg",
 
-               userName:    commentData['userName']!,
+                    userName: commentData['userName']!,
 
-
-
-
-               // تمرير الفهرس
-            );
-          },
-        )
+                    // تمرير الفهرس
+                  );
+                },
+              )
             : Center(child: Text('لا توجد تعليقات بعد.')),
       ),
     );
   }
 
-  Widget _buildCommentItem({required List<dynamic> Likes,
+  Widget _buildCommentItem({
+    required List<dynamic> Likes,
     required String? commentId,
     required String userName,
     required String comment,
@@ -551,9 +532,12 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
                         onPressed: () {
                           setState(() {
                             if (isLiked) {
-                              _ideaController.addLikeForComment(commentId??"");
+                              _ideaController
+                                  .addLikeForComment(commentId ?? "");
                               _likes.add({
-                                '_id': DateTime.now().microsecondsSinceEpoch.toString(),
+                                '_id': DateTime.now()
+                                    .microsecondsSinceEpoch
+                                    .toString(),
                                 "createdAt": "2025-02-06T18:43:27.073Z"
                               });
                             } else {
@@ -611,6 +595,7 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
           ),
           GestureDetector(
             onTap: () {
+              !widget.isToInformation?SizedBox():
               _showChatDialog(context);
             },
             child: Text(
@@ -628,7 +613,8 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             textAlign: TextAlign.right,
           ),
-          Text(_description.toString(),
+          Text(
+            _description.toString(),
             style: TextStyle(fontSize: 14),
             textAlign: TextAlign.right,
           ),
@@ -649,7 +635,7 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
               child: Container(
                 width: 400,
                 height: 600,
-                child: ChatForInquiriesScreen(),
+                child: ChatForInquiriesScreen(id: _ownarIdeaId!,),
               ),
             ),
           ],
@@ -674,8 +660,8 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
           ),
         ),
         SizedBox(height: 10),
-        Text(_category.toString()
-          ,
+        Text(
+          _category.toString(),
           style: TextStyle(fontSize: 16, color: Colors.grey),
           textAlign: TextAlign.center,
         ),
@@ -720,7 +706,6 @@ class _PreviewIdeaScreenState extends State<PreviewIdeaScreen> {
                   ),
                   onPressed: () {
                     setState(() {
-
                       isLikedIdea = !isLikedIdea;
                       if (isLikedIdea) {
                         _ideaController.addLikeForIdea(widget.ideaId);

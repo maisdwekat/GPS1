@@ -76,8 +76,8 @@ class FeedbackController {
     }
 
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/all/$feedbackId'), // Adjust the endpoint as needed
+      final response = await http.delete(
+        Uri.parse('$baseUrl/delete/$feedbackId'), // Adjust the endpoint as needed
         headers: {
           'Content-Type': 'application/json',
           'token': 'token__$savedToken',
@@ -90,7 +90,6 @@ class FeedbackController {
 
         // Check if 'getFeedback' key exists and is a List
         if (responseData['showAll'] is List) {
-          List<dynamic> ideas = responseData['showAll'];
           return true;
         } else {
           print("Error: 'getFeedback' is not a List or does not exist");

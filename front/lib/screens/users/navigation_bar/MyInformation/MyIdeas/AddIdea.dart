@@ -1,7 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ggg_hhh/screens/users/homepageUsers/HomePageScreenUsers.dart';
 import '../../../../../Controllers/ideaController.dart';
 import '../../../../../constants.dart';
+
+List<String> categories = [
+  'تعليمي',
+  'تواصل اجتماعي',
+  'التواصل والإعلام',
+  'تجارة إلكترونية',
+  'مالي وخدمات الدفع',
+  'موسيقى وترفيه',
+  'أمن إلكتروني',
+  'الصحة',
+  'نقل وتوصيل',
+  'تصنيع',
+  'منصة إعلانية',
+  'تسويق إلكتروني',
+  'محتوى',
+  'الزراعة',
+  'خدمات إعلانية',
+  'انترنت الأشياء',
+  'الملابس',
+  'الطاقة',
+  'الأطفال',
+  'البرنامج كخدمة',
+  'ذكاء اصطناعي',
+  'تعليم الآلة',
+  'خدمات منزلية',
+  'ألعاب',
+  'التمويل الجماعي',
+  'هدايا',
+];
 
 class AddideaScreen extends StatefulWidget {
   bool toUpdate = false;
@@ -18,7 +48,6 @@ class AddideaScreen extends StatefulWidget {
 }
 
 class _AddideaScreenState extends State<AddideaScreen> {
-
   final TextEditingController descriptionController = TextEditingController();
   String? selectedCategory;
   bool isPublic = false;
@@ -27,7 +56,7 @@ class _AddideaScreenState extends State<AddideaScreen> {
   getIdeaDataToUpdate() async {
     var result = await ideaController.getIdea(widget.ideaId.toString());
     descriptionController.text = result!['description'].toString();
-    selectedCategory = result['category'].toString();
+    selectedCategory = result['category'];
     isPublic = result['isPublic'];
     setState(() {
       widget.isLoading = false;
@@ -37,7 +66,7 @@ class _AddideaScreenState extends State<AddideaScreen> {
 
   getIdeaDataToAdd() async {
     descriptionController.text = '';
-    selectedCategory = '';
+    selectedCategory = categories.first;
     isPublic = false;
     setState(() {
       widget.isLoading = false;
@@ -49,12 +78,32 @@ class _AddideaScreenState extends State<AddideaScreen> {
     super.initState();
     if (widget.toUpdate == true) {
       getIdeaDataToUpdate();
-    }
-    else {
+    } else {
+      selectedCategory = categories.first;
+      isPublic = false;
       getIdeaDataToAdd();
     }
   }
 
+  void updateIdea() async {
+    IdeaController ideaController = IdeaController();
+    var result = await ideaController.updateIdea(descriptionController.text,
+        isPublic, selectedCategory!, widget.ideaId.toString());
+    if (result != null) {
+      print("Idea updated successfully!");
+      _showSuccessDialog('updated');
+    } else {
+      print("Failed to update idea: ${result?['message']}");
+      Fluttertoast.showToast(
+        msg: "Failed to update idea: ${result?['message']}",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
+  }
 
   void addIdea() async {
     IdeaController ideaController = IdeaController();
@@ -66,7 +115,7 @@ class _AddideaScreenState extends State<AddideaScreen> {
 
     if (result != null && result['success']) {
       print("Idea added successfully!");
-      _showSuccessDialog();
+      _showSuccessDialog('added');
     } else {
       print("Failed to add idea: ${result?['message']}");
       Fluttertoast.showToast(
@@ -80,23 +129,21 @@ class _AddideaScreenState extends State<AddideaScreen> {
     }
   }
 
-  void _showSuccessDialog() {
+  void _showSuccessDialog(String status) {
     showDialog(
       context: context,
-      builder: (context) =>
-          AlertDialog(
-            title: Text("Success"),
-            content: Text("Your idea has been added successfully."),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text("OK"),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: Text("Success"),
+        content: Text("Your idea has been $status successfully."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("OK"),
           ),
+        ],
+      ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -105,68 +152,80 @@ class _AddideaScreenState extends State<AddideaScreen> {
         backgroundColor: kPrimaryColor,
       ),
       body: widget.isLoading
-          ? Center(child: CircularProgressIndicator(),)
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
           : Center(
-        child: SingleChildScrollView(
-          child: Container(
-            color: Colors.grey[200],
-            padding: EdgeInsets.all(20),
-            margin: EdgeInsets.symmetric(vertical: 20, horizontal: 150),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  'إضافة فكرة',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.right,
-                ),
-                SizedBox(height: 20),
-                Text(
-                  'تنويه: جميع الحقول مطلوبة حتى يتم نشر المشروع',
-                  style: TextStyle(color: Colors.red),
-                  textAlign: TextAlign.right,
-                ),
-                SizedBox(height: 20),
-                _buildLabeledTextField(
-                    'شرح مبسط عن الفكرة', descriptionController, maxLength: 140,
-                    maxLines: 3),
-                SizedBox(height: 10),
-                Text('ما هو مجال الفكرة', textAlign: TextAlign.right,
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                _buildDropdownField(),
-                SizedBox(height: 20),
-                _buildVisibilityDropdown(),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    SizedBox(
-                      width: 150,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context); // العودة للصفحة السابقة
-                        },
-                        child: Text('إلغاء'),
+              child: SingleChildScrollView(
+                child: Container(
+                  color: Colors.grey[200],
+                  padding: EdgeInsets.all(20),
+                  margin: EdgeInsets.symmetric(vertical: 20, horizontal: 150),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'إضافة فكرة',
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.right,
                       ),
-                    ),
-                    SizedBox(
-                      width: 150,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          addIdea();
-                          Navigator.pop(context); // العودة للصفحة السابقة
-
-                        },
-                        child: Text('حفظ '),
+                      SizedBox(height: 20),
+                      Text(
+                        'تنويه: جميع الحقول مطلوبة حتى يتم نشر المشروع',
+                        style: TextStyle(color: Colors.red),
+                        textAlign: TextAlign.right,
                       ),
-                    ),
-                  ],
+                      SizedBox(height: 20),
+                      _buildLabeledTextField(
+                          'شرح مبسط عن الفكرة', descriptionController,
+                          maxLength: 140, maxLines: 3),
+                      SizedBox(height: 10),
+                      Text('ما هو مجال الفكرة',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      _buildDropdownField(),
+                      SizedBox(height: 20),
+                      _buildVisibilityDropdown(),
+                      SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(
+                            width: 150,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context); // العودة للصفحة السابقة
+                              },
+                              child: Text('إلغاء'),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 150,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                if (widget.toUpdate == true) {
+                                  updateIdea();
+                                } else {
+                                  addIdea();
+                                }
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => homepagescreen()),
+                                  (Route<dynamic> route) => false,
+                                );
+                              },
+                              child: Text('حفظ '),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -175,7 +234,8 @@ class _AddideaScreenState extends State<AddideaScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(label, textAlign: TextAlign.right,
+        Text(label,
+            textAlign: TextAlign.right,
             style: TextStyle(fontWeight: FontWeight.bold)),
         SizedBox(height: 8),
         Container(
@@ -214,66 +274,36 @@ class _AddideaScreenState extends State<AddideaScreen> {
   }
 
   Widget _buildDropdownField() {
-    List<String> categories = [
-      'تعليمي',
-      'تواصل اجتماعي',
-      'التواصل والإعلام',
-      'تجارة إلكترونية',
-      'مالي وخدمات الدفع',
-      'موسيقى وترفيه',
-      'أمن إلكتروني',
-      'الصحة',
-      'نقل وتوصيل',
-      'تصنيع',
-      'منصة إعلانية',
-      'تسويق إلكتروني',
-      'محتوى',
-      'الزراعة',
-      'خدمات إعلانية',
-      'انترنت الأشياء',
-      'الملابس',
-      'الطاقة',
-      'الأطفال',
-      'البرنامج كخدمة',
-      'ذكاء اصطناعي',
-      'تعليم الآلة',
-      'خدمات منزلية',
-      'ألعاب',
-      'التمويل الجماعي',
-      'هدايا',
-    ];
+    selectedCategory ?? categories.first;
     return Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
         SizedBox(height: 8),
-    Container(
-    width: 700,
-    color: Colors.white,
-    child: DropdownButtonFormField<String>(
-      value: categories.contains(selectedCategory) ? selectedCategory : categories.first,
-      items:categories .map((String value) {
-    return DropdownMenuItem<String>(
-
-    value: value,
-
-    child: Text(value),
-    );
-    }).toList(),
-    onChanged: (value) {
-    selectedCategory = value ?? '';
-    },
-    decoration: InputDecoration(
-    border: OutlineInputBorder(),
-    ),
-    ),
-    ),
-    ],
+        Container(
+          width: 700,
+          color: Colors.white,
+          child: DropdownButtonFormField<String>(
+            value: selectedCategory,
+            items: categories.map((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: (value) {
+              selectedCategory = value ?? categories.first;
+            },
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildVisibilityDropdown() {
     List<String> visibilityOptions = ['عام', 'خاص'];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [

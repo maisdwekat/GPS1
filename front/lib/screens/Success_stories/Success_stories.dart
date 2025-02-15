@@ -22,49 +22,55 @@ class _SuccessStoriesScreenState extends State<SuccessStoriesScreen> {
 
   // بيانات العناصر مع تفاصيل إضافية
   final List<Map<String, String>> _items = [
-  {
-  "title": " طرقات ",
-  "image": "assets/images/Success1.PNG",
-  "description": "Turqat offers a range of functions and services to have safer travels and a peace of mind.",
-  "route": "/page1",
-  },
-  {
-  "title": "سكل زاد",
-  "image": "assets/images/Success2.PNG",
-  "description": " E-learning platform for private tutoring for university students that help them pass their degrees and be prepared for the workforce",
-  "route": "/page2",
-  },
-  {
-  "title": "SHIFT-ICT ",
-  "image": "assets/images/Success3.PNG",
-  "description": "SHIFT-ICT is an innovative, technological service provider company that delivers IT services with high quality and competitive cost advantages.",
-  "route": "/page3",
-  },
-  {
-  "title": "Developers Plus",
-  "image": "assets/images/Success4.PNG",
-  "description": " We, Developers Plus, are a specialized company in Software Development.",
-  "route": "/page4",
-  },
-  {
-  "title": " Algebra Intelligence",
-  "image": "assets/images/Success5.PNG",
-  "description": " Algebra Intelligence is a software development firm that integrates artificial intelligence solutions into the Energy Sector to usher smart technology into sustainable development.",
-  "route": "/page5",
-  },
-  {
-  "title": " Newline Tech Company for Information Technology",
-  "image": "assets/images/Success6.PNG",
-  "description": "NEWLINE TECH) is a Palestinian company established early 2011. NEWLINE TECH is dedicated to provide technology-based solutions, In simple terms",
-  "route": "/page6",
-  },
+    {
+      "title": " طرقات ",
+      "image": "assets/images/Success1.PNG",
+      "description":
+          "Turqat offers a range of functions and services to have safer travels and a peace of mind.",
+      "route": "/page1",
+    },
+    {
+      "title": "سكل زاد",
+      "image": "assets/images/Success2.PNG",
+      "description":
+          " E-learning platform for private tutoring for university students that help them pass their degrees and be prepared for the workforce",
+      "route": "/page2",
+    },
+    {
+      "title": "SHIFT-ICT ",
+      "image": "assets/images/Success3.PNG",
+      "description":
+          "SHIFT-ICT is an innovative, technological service provider company that delivers IT services with high quality and competitive cost advantages.",
+      "route": "/page3",
+    },
+    {
+      "title": "Developers Plus",
+      "image": "assets/images/Success4.PNG",
+      "description":
+          " We, Developers Plus, are a specialized company in Software Development.",
+      "route": "/page4",
+    },
+    {
+      "title": " Algebra Intelligence",
+      "image": "assets/images/Success5.PNG",
+      "description":
+          " Algebra Intelligence is a software development firm that integrates artificial intelligence solutions into the Energy Sector to usher smart technology into sustainable development.",
+      "route": "/page5",
+    },
+    {
+      "title": " Newline Tech Company for Information Technology",
+      "image": "assets/images/Success6.PNG",
+      "description":
+          "NEWLINE TECH) is a Palestinian company established early 2011. NEWLINE TECH is dedicated to provide technology-based solutions, In simple terms",
+      "route": "/page6",
+    },
   ];
+
   @override
   void initState() {
     super.initState();
     _hoveredStates = List<bool>.filled(_items.length, false);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -79,19 +85,20 @@ class _SuccessStoriesScreenState extends State<SuccessStoriesScreen> {
           children: [
             HeaderScreen(), // استدعاء الهيدر
             NavigationBarUsers(
-              scaffoldKey: _scaffoldKey,
               onSelectContact: (value) {
-                // منطق لتحديد جهة الاتصال
+                _scaffoldKey.currentState!.openDrawer();
               },
-            ),  const SizedBox(height: 40),
+            ),
+            const SizedBox(height: 40),
             _buildGrid(), // إضافة المربعات هنا
             const SizedBox(height: 40),
-           Footer(),
+            Footer(),
           ],
         ),
       ),
     );
   }
+
   Widget _buildGrid() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -135,7 +142,8 @@ class _SuccessStoriesScreenState extends State<SuccessStoriesScreen> {
         alignment: Alignment.center,
         child: _hoveredStates[index]
             ? _buildHoveredContent(index) // تمرير الفهرس للمحتوى عند التحويم
-            : _buildInitialContent(_items[index]["title"]!, _items[index]["image"]!),
+            : _buildInitialContent(
+                _items[index]["title"]!, _items[index]["image"]!),
       ),
     );
   }
@@ -175,7 +183,8 @@ class _SuccessStoriesScreenState extends State<SuccessStoriesScreen> {
             children: [
               Text(
                 _items[index]["title"]!, // استخدام العنوان الخاص بكل عنصر
-                style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold),
+                style: GoogleFonts.poppins(
+                    fontSize: 16, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 5),
@@ -187,7 +196,8 @@ class _SuccessStoriesScreenState extends State<SuccessStoriesScreen> {
               const SizedBox(height: 10),
               GestureDetector(
                 onTap: () {
-                  Navigator.pushNamed(context, _items[index]["route"]!); // التنقل إلى الصفحة الخاصة
+                  Navigator.pushNamed(context,
+                      _items[index]["route"]!); // التنقل إلى الصفحة الخاصة
                 },
                 child: Text(
                   'اقرأ المزيد',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../Controllers/token_controller.dart';
 import '../Welcome/welcome_screen.dart';
 import '../users/navigation_bar/NavigationBarUsers.dart';
 import 'ActiveUsersTable.dart';
@@ -69,13 +70,22 @@ class _NotificationsState extends State<Notifications> {
         style: TextStyle(color: Colors.white54),
       ),
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => page),
-        );
-      },
+        if (page is WelcomeScreen) {
+          TokenController tokenController=TokenController();
+          tokenController.logout();
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => page),(route) => false,);
+        }
+        else{
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => page),
+          );
+        }},
     );
   }
+
 
   Widget _buildMainContent(BuildContext context) {
     return Column(

@@ -17,12 +17,10 @@ import 'LaunchProject/Launch_your_project.dart';
 import 'StartUpsHub/Courses/Courses.dart';
 
 class NavigationBarUsers extends StatelessWidget {
-  final GlobalKey<ScaffoldState> scaffoldKey;
   final Function(String) onSelectContact;
 
   const NavigationBarUsers({
     Key? key,
-    required this.scaffoldKey,
     required this.onSelectContact,
   }) : super(key: key);
 
@@ -41,7 +39,7 @@ class NavigationBarUsers extends StatelessWidget {
                 children: [
                   IconButton(
                     icon: Icon(Icons.person),
-                    onPressed: () => scaffoldKey.currentState?.openDrawer(),
+                    onPressed: () => onSelectContact('open_drawer'), // Fix: Call the function
                   ),
                   const SizedBox(width: 16),
                   IconButton(

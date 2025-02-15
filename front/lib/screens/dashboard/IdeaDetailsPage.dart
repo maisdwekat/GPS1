@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 
 class IdeaDetailsPage extends StatelessWidget {
+
   final String description;
   final String field;
   final String email; // إضافة متغير البريد الإلكتروني
-  final String status; // إضافة متغير حالة الفكرة
+  final bool status; // إضافة متغير حالة الفكرة
 
   IdeaDetailsPage({
-    this.description = 'لا يوجد وصف متاح',
-    this.field = 'غير محدد',
-    this.email = 'غير متوفر',
-    this.status = 'خاص', // القيمة الافتراضية لحالة الفكرة
+   required this.description ,
+    required this.field ,
+    required this.email ,
+    required this.status , // القيمة الافتراضية لحالة الفكرة
   });
 
-  @override
+
+   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFF2B2B2B), // لون خلفية من درجات الأسود
@@ -52,7 +54,7 @@ class IdeaDetailsPage extends StatelessWidget {
             ),
             SizedBox(height: 16),
             Text(
-              'حالة الفكرة: $status',
+              'حالة الفكرة: ${status?'عام':'خاص'}',
               style: TextStyle(color: Colors.white, fontSize: 16),
             ),
           ],

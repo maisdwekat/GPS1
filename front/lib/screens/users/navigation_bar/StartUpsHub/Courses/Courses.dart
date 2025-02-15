@@ -57,50 +57,62 @@ class _CoursesScreenState extends State<CoursesScreen> {
           children: [
             HeaderScreen(),
             NavigationBarUsers(
-              scaffoldKey: _scaffoldKey,
               onSelectContact: (value) {
-                // منطق لتحديد جهة الاتصال
+                _scaffoldKey.currentState!.openDrawer();
               },
             ),
             const SizedBox(height: 20),
-            // إضافة مستطيلات الدورات
-            ...courses.map((course) {
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        course['nameOfCompany'] ?? '',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.right,
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        course['nameOfEducationalCourse'] ?? '',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                        textAlign: TextAlign.right,
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        course['description'] ?? '',
-                        style: TextStyle(fontSize: 14),
-                        textAlign: TextAlign.right,
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'تاريخ الدورة: ${course['DateOfCourse'] ?? ''}',
-                        style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
-                        textAlign: TextAlign.right,
-                      ),
-                    ],
+            // استخدام GridView لعرض 3 مربعات في السطر الواحد
+            GridView.builder(
+              physics: NeverScrollableScrollPhysics(), // منع التمرير
+              shrinkWrap: true, // يسمح بملء المساحة
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 5, // عدد الأعمدة
+                crossAxisSpacing: 16, // المسافة بين الأعمدة
+                mainAxisSpacing: 16, // المسافة بين الصفوف
+              ),
+              itemCount: courses.length,
+              itemBuilder: (context, index) {
+                final course = courses[index];
+                return Card(
+
+                  // elevation: 4,
+                  child:
+
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          course['nameOfCompany'] ?? '',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.right,
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          course['nameOfEducationalCourse'] ?? '',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                          textAlign: TextAlign.right,
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          course['description'] ?? '',
+                          style: TextStyle(fontSize: 14),
+                          textAlign: TextAlign.right,
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'تاريخ الدورة: ${course['DateOfCourse'] ?? ''}',
+                          style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
+                          textAlign: TextAlign.right,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              },
+            ),
             const SizedBox(height: 40),
             Footer(),
           ],

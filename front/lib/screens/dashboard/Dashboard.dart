@@ -226,8 +226,8 @@ class UserRequestTable extends StatefulWidget {
 
 class _UserRequestTableState extends State<UserRequestTable> {
   List<Map<String, String>> requests = [
-    {'user': 'أحمد', 'type': 'نشر فكرة', 'email': 'user1@example.com'},
-    {'user': 'عبير', 'type': 'نشر مشروع', 'email': 'user2@example.com'},
+    {'user': 'noor', 'type': 'نشر فكرة', 'email': 'noor@gmail.com'},
+    {'user': 'samer', 'type': 'نشر مشروع', 'email': 'samer@gmail.com'},
   ];
 
   @override
@@ -333,18 +333,20 @@ class _UserRequestTableState extends State<UserRequestTable> {
                   Widget page;
 
                   if (requestType == "نشر فكرة") {
-                    page = IdeaDetailsPage(); // صفحة تفاصيل الفكرة
+                    // page = IdeaDetailsPage(); // صفحة تفاصيل الفكرة
                   } else if (requestType == "نشر مشروع") {
-                    page = ProjectDetailsPage(); // صفحة تفاصيل المشروع
+                    // page = ProjectDetailsPage();
+                    // صفحة تفاصيل المشروع
+                    page=DashboardPage();
                   } else {
                     // يمكنك تعيين صفحة افتراضية هنا
                     page = DashboardPage(); // استبدل هذا بصفحة افتراضية مناسبة
                   }
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => page),
-                  );
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(builder: (context) => page),
+                  // );
                 },
               ),
             ],

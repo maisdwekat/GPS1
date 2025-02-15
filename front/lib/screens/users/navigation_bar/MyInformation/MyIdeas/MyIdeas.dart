@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import '../../../../../Controllers/ideaController.dart';
+import '../../../../../Widget/user_information_header.dart';
 import '../../../homepageUsers/HomePageScreenUsers.dart';
 import 'AddIdea.dart';
 import '../MyAccount.dart';
@@ -50,15 +51,7 @@ class _MyIdeasScreenState extends State<MyIdeasScreen> {
     }
   }
 
-  Future<void> _pickImage() async {
-    final ImagePicker _picker = ImagePicker();
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        _profileImage = image.path;
-      });
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -87,38 +80,7 @@ class _MyIdeasScreenState extends State<MyIdeasScreen> {
         child: Column(
           children: [
             Container(color: Color(0xFF0A1D47), height: 30),
-            Container(
-              color: Colors.grey[200],
-              padding: EdgeInsets.all(10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    'اسم الشخص',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(width: 10),
-                  GestureDetector(
-                    onTap: _pickImage,
-                    child: Stack(
-                      alignment: Alignment.bottomRight,
-                      children: [
-                        CircleAvatar(
-                          radius: 80,
-                          backgroundImage: _profileImage.isNotEmpty
-                              ? FileImage(File(_profileImage))
-                              : const AssetImage('assets/images/defaultpfp.jpg') as ImageProvider,
-                          child: _profileImage.isEmpty
-                              ? const Icon(Icons.camera_alt, size: 30, color: Colors.grey)
-                              : null,
-                        ),
-                        const Icon(Icons.edit, color: Color(0xFF0A1D47)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            UserInformationHeader(),
             Container(height: 2, color: Color(0xFF0A1D47)),
             Container(
               color: Colors.grey[200],
@@ -207,7 +169,7 @@ class _MyIdeasScreenState extends State<MyIdeasScreen> {
 
     return Container(
       width: 200, // عرض البطاقة
-      height: 400, // ارتفاع البطاقة
+      height: 450, // ارتفاع البطاقة
       padding: EdgeInsets.all(10),
       margin: EdgeInsets.only(right: 10, bottom: 10), // المسافة بين المربعات
       decoration: BoxDecoration(
@@ -225,6 +187,21 @@ class _MyIdeasScreenState extends State<MyIdeasScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+
+              IconButton(
+                onPressed: () {
+                  _ideaController
+                      .deleteIdea(idea['_id'].toString());
+
+                  setState(() {});
+                },
+                icon: Icon(Icons.delete, color: Colors.red),
+              ),
+            ],
+          ),
           // تحديد مساحة الصورة
           Container(
             width: 100, // عرض الصورة

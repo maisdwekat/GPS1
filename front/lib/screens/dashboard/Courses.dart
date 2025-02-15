@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../Controllers/CoursesController.dart';
+import '../../Controllers/token_controller.dart';
 import '../ContactUs/Chat.dart';
 import '../Welcome/welcome_screen.dart';
 import '../users/GrantsPage/GrantsPage.dart';
@@ -222,7 +223,7 @@ class _CoursesState extends State<Courses> {
     print("delete Course : ");
     try {
       await _coursesController.deleteCourse(id);
-       fetchCourses(); // تحديث قائمة الدورات بعد الحذف
+      // fetchCourses(); // تحديث قائمة الدورات بعد الحذف
     } catch (e) {
       print('Error: $e');
     }
@@ -246,11 +247,9 @@ class _CoursesState extends State<Courses> {
           _buildMenuItem(context, "الدورات", Courses()),
           _buildMenuItem(context, "أكثر المستخدمين نشاطًا", ActiveUsers()),
           _buildMenuItem(context, "الفيد باك", FeedbackPage()),
-          _buildMenuItem(context, "المنح", Grantpage()),
+          _buildMenuItem(context, "المنح", GrantsPage()),
           _buildMenuItem(context, "الاشعارات", Notifications()),
           _buildMenuItem(context, "الرسائل", ChatScreen()),
-          _buildMenuItem(context, "تسجيل خروج", WelcomeScreen()),
-
         ],
       ),
     );
@@ -263,13 +262,22 @@ class _CoursesState extends State<Courses> {
         style: TextStyle(color: Colors.white54),
       ),
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => page),
-        );
-      },
+        if (page is WelcomeScreen) {
+          TokenController tokenController=TokenController();
+          tokenController.logout();
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => page),(route) => false,);
+        }
+        else{
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => page),
+          );
+        }},
     );
   }
+
 
   Widget _buildMainContent(BuildContext context) {
     return Column(

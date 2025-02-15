@@ -6,8 +6,8 @@ import '../../Success_stories/Success_stories.dart';
 import '../../Success_stories/Success_stories_investor.dart';
 import '../../WhoWeAre/WhoWeAre.dart';
 import '../../WhoWeAre/WhoWeAre_investor.dart';
-import '../../investor/navigation_bar_investor/StartUpsHub/Ideas/Ideas.dart';
-import '../../investor/navigation_bar_investor/StartUpsHub/Projects/Projects.dart';
+import '../../users/navigation_bar/StartUpsHub/Ideas/Ideas.dart';
+import '../../users/navigation_bar/StartUpsHub/Projects/Projects.dart';
 import '../homepageinvestor/HomePageScreeninvestor.dart';
 
 class NavigationBarinvestor extends StatelessWidget {
@@ -73,9 +73,9 @@ class NavigationBarinvestor extends StatelessWidget {
                     ],
                         (value) {
                       if (value == 'المشاريع') {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => ProjectsScreen()));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => ProjectsScreen.investor()));
                       } else if (value == 'الأفكار') {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => IdeasScreen()));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => IdeasScreen.invstor()));
                       }
                     },
                   ),

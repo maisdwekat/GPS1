@@ -14,6 +14,7 @@ class BMCcontroller {
   }
 
   Future<Map<String, dynamic>?> addBusinessCanva({
+    required String projectId,
     required String customerSegments,
     required String valuePropositions,
     required String channels,
@@ -35,7 +36,7 @@ class BMCcontroller {
 
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/addBusinessCanva/67a4b85bdbe6cc6fd435b6f7'),
+        Uri.parse('$baseUrl/addBusinessCanva/$projectId'),
         headers: {'Content-Type': 'application/json',
           'token': tokenWithPrefix,},
         body: json.encode({
@@ -77,7 +78,7 @@ class BMCcontroller {
 
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/getBusinessCanva/67a4b85bdbe6cc6fd435b6f7'),
+        Uri.parse('$baseUrl/getBusinessCanva/$id'),
         headers: {
           'Content-Type': 'application/json',
           'token': tokenWithPrefix,

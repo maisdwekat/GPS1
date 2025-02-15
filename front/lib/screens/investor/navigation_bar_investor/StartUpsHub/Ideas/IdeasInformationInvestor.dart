@@ -3,7 +3,7 @@ import '../../../../../constants.dart';
 import '../../../../ChatForInquiries/ChatForInquiries.dart';
 import '../../../../basic/footer.dart';
 import '../../../../basic/header.dart';
-import '../../../InvestmentModel.dart';
+import '../../../../../Investments/InvestmentModel.dart';
 import '../../Drawerinvestor/Drawerinvestor.dart';
 import '../../NavigationBarinvestor.dart';
 

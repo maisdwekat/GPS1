@@ -1,0 +1,12 @@
+import 'package:flutter/material.dart';
+
+import '../models/chat_model.dart';
+
+class ChatProvidor extends ChangeNotifier{
+  List<dynamic> chatList = [];
+
+  void addChat(dynamic chat){
+    chatList.add({'senderRole': 'admin', 'message': chat});
+  }
+
+}

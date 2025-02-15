@@ -6,8 +6,9 @@ import '../screens/users/navigation_bar/MyInformation/MyStartupProjects/BMCform.
 import '../screens/users/navigation_bar/MyInformation/MyStartupProjects/MyStartupProjects.dart';
 
 class BmcWidget extends StatefulWidget {
-   BmcWidget({super.key});
-   BmcWidget.pre({required this.isPre});
+  String id;
+   BmcWidget({super.key,required this.id});
+   BmcWidget.pre({ this.isPre = true, required this.id});
    bool isPre = false ;
 
   @override
@@ -26,7 +27,7 @@ class _BmcWidgetState extends State<BmcWidget> {
    }
 
   Future<void> _loadBusinessCanva() async {
-    final result = await _bmcController.getBusinessCanva("67a4b85bdbe6cc6fd435b6f7");
+    final result = await _bmcController.getBusinessCanva(widget.id);
     if (result != null && result['success']) {
       var data = result['data'];
 

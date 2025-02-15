@@ -86,17 +86,17 @@ class _FeedbackPageState extends State<FeedbackPage> {
     return feedbackList == null
         ? Center(child: CircularProgressIndicator())
         : Center(
-            child: Column(
-              children: [
-                _buildHeader(),
-                _buildTitle(),
-                Expanded(
-                    child: feedbackList == null
-                        ? Center(child: CircularProgressIndicator())
-                        : FeedbackTable(feedbackList: feedbackList)),
-              ],
-            ),
-          );
+      child: Column(
+        children: [
+          _buildHeader(),
+          _buildTitle(),
+          Expanded(
+              child: feedbackList == null
+                  ? Center(child: CircularProgressIndicator())
+                  : FeedbackTable(feedbackList: feedbackList)),
+        ],
+      ),
+    );
   }
 
   Widget _buildTitle() {
@@ -201,8 +201,44 @@ class _FeedbackTableState extends State<FeedbackTable> {
                       style: const TextStyle(color: Colors.white))),
                   DataCell(Text(feedback["createdBy"]!,
                       style: const TextStyle(color: Colors.white))),
-                  DataCell(Text(feedback["description"]!,
-                      style: const TextStyle(color: Colors.white))),
+                  DataCell(
+                      // Text(feedback["description"]!,
+                      // style: const TextStyle(color: Colors.white))
+                    IconButton(
+                      icon:Icon( Icons.preview_outlined,),
+                      onPressed: () {
+                        showGeneralDialog(context: context, pageBuilder: (context, animation, secondaryAnimation) {
+
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 300.0,vertical: 200.0),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.all(Radius.circular(10)),
+                                child: Scaffold(
+                                  body: SizedBox(
+                                      height: 200,
+                                      width: double.infinity,
+                                      child: Center(child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                        children: [
+                                          Text(feedback["description"]!),
+                                          SizedBox(
+                                              width: 80,
+                                              child: ElevatedButton(onPressed: (){
+                                                Navigator.of(context).pop();
+                                              }, child: Text('اغلاق')))
+                                        ],
+                                      ))),
+                                ),
+                              ),
+                            );
+
+
+                        },);
+
+
+                      },
+                    )
+                  ),
                   DataCell(
                     IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
@@ -215,7 +251,7 @@ class _FeedbackTableState extends State<FeedbackTable> {
                           await feedbackController.getAllFeedbackForAdmin();
                         } else {
                           widget.feedbackList =
-                              await feedbackController.getAllFeedbackForAdmin();
+                          await feedbackController.getAllFeedbackForAdmin();
                         }
                         setState(() {});
 

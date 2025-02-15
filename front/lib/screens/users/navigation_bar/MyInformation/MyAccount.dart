@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:typed_data';
 
 import '../../../../Controllers/token_controller.dart';
+import '../../../../Widget/user_information_header.dart';
 import '../../../../constants.dart';
 import '../../homepageUsers/HomePageScreenUsers.dart';
 import 'MyIdeas/MyIdeas.dart';
@@ -23,98 +22,93 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _fetchUserData();
   }
-  Uint8List? _profileImage;
+
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _birthDateController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController(); // New phone controller
+  final TextEditingController _phoneController =
+      TextEditingController(); // New phone controller
   String _gender = 'male';
-  TokenController token =TokenController();
+  TokenController token = TokenController();
+
   Future<void> _fetchUserData() async {
-
-    final savedToken =await token.getToken();
+    final savedToken = await token.getToken();
     if (savedToken == null || savedToken.isEmpty) {
       print("Error: Token is null or empty");
       //return {'success': false, 'message': "Authentication token is missing"};
     }
     String tokenWithPrefix = 'token__$savedToken';
 
-    try{
-    final response = await http.get(
-      Uri.parse('http://$ip:4000/api/v1/auth/getAccount'),
-      headers: {
-        'Content-Type': 'application/json',
-        'token': tokenWithPrefix,},
-    );
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      var userData = data['user'];
-      print(" $data");
-      setState(() {
-        _fullNameController.text = userData['name'] ?? '';  // الآن نصل إلى name داخل 'user'
-        _emailController.text = userData['email'] ?? '';  // الوصول إلى email داخل 'user'
-        _birthDateController.text = '2020';  // يمكنك تعديل هذا كما تراه مناسباً
-        _gender = userData['gender'] ?? 'male';  // الوصول إلى gender داخل 'user'
-        _phoneController.text = userData['phoneNumber'] ?? '';
-      });
-
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('فشل في جلب بيانات المستخدم')),
+    try {
+      final response = await http.get(
+        Uri.parse('http://$ip:4000/api/v1/auth/getAccount'),
+        headers: {
+          'Content-Type': 'application/json',
+          'token': tokenWithPrefix,
+        },
       );
-    }} catch (error) {
-  print('Error: $error');
-  //return {'success': false, 'message': "An error occurred"};
-  }
-  }
-
-  Future<void> _updateUserData() async {
-    final savedToken =await token.getToken();
-    if (savedToken == null || savedToken.isEmpty) {
-      print("Error: Token is null or empty");
-      //return {'success': false, 'message': "Authentication token is missing"};
-    }
-    String tokenWithPrefix = 'token__$savedToken';
-    try{
-    final response = await http.patch(
-      Uri.parse('http://$ip:4000/api/v1/auth/updateUserInfo'),
-      headers: {
-        'Content-Type': 'application/json',
-        'token': tokenWithPrefix,
-      },
-      body: json.encode({
-        'name': _fullNameController.text,
-        'email': _emailController.text,
-       // 'birthDate': _birthDateController.text,
-        'phoneNumber': _phoneController.text, // Sending phone
-        'gender': _gender,
-      }),
-    );
-    if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('تم تحديث البيانات بنجاح')),
-      );
-    } else {
-      print("Failed Response: ${response.body}");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('فشل في تحديث البيانات')),
-      );
-    }
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        var userData = data['user'];
+        print(" $data");
+        setState(() {
+          _fullNameController.text =
+              userData['name'] ?? ''; // الآن نصل إلى name داخل 'user'
+          _emailController.text =
+              userData['email'] ?? ''; // الوصول إلى email داخل 'user'
+          _birthDateController.text =
+              '2020'; // يمكنك تعديل هذا كما تراه مناسباً
+          _gender =
+              userData['gender'] ?? 'male'; // الوصول إلى gender داخل 'user'
+          _phoneController.text = userData['phoneNumber'] ?? '';
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('فشل في جلب بيانات المستخدم')),
+        );
+      }
     } catch (error) {
       print('Error: $error');
       //return {'success': false, 'message': "An error occurred"};
     }
   }
 
-  Future<void> _pickImage() async {
-    final ImagePicker _picker = ImagePicker();
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      final bytes = await image.readAsBytes();
-      setState(() {
-        _profileImage = bytes;
-      });
+  Future<void> _updateUserData() async {
+    final savedToken = await token.getToken();
+    if (savedToken == null || savedToken.isEmpty) {
+      print("Error: Token is null or empty");
+      //return {'success': false, 'message': "Authentication token is missing"};
+    }
+    String tokenWithPrefix = 'token__$savedToken';
+    try {
+      final response = await http.patch(
+        Uri.parse('http://$ip:4000/api/v1/auth/updateUserInfo'),
+        headers: {
+          'Content-Type': 'application/json',
+          'token': tokenWithPrefix,
+        },
+        body: json.encode({
+          'name': _fullNameController.text,
+          'email': _emailController.text,
+          // 'birthDate': _birthDateController.text,
+          'phoneNumber': _phoneController.text, // Sending phone
+          'gender': _gender,
+        }),
+      );
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('تم تحديث البيانات بنجاح')),
+        );
+      } else {
+        print("Failed Response: ${response.body}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('فشل في تحديث البيانات')),
+        );
+      }
+    } catch (error) {
+      print('Error: $error');
+      //return {'success': false, 'message': "An error occurred"};
     }
   }
 
@@ -124,7 +118,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       MaterialPageRoute(builder: (context) => EditPasswordPage()),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -139,11 +132,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.home, color: Colors.white), // أيقونة الصفحة الرئيسية
+            icon: Icon(Icons.home, color: Colors.white),
+            // أيقونة الصفحة الرئيسية
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => homepagescreen()), // استبدل بـ HomePageScreen()
+                MaterialPageRoute(
+                    builder: (context) =>
+                        homepagescreen()), // استبدل بـ HomePageScreen()
               );
             },
           ),
@@ -153,7 +149,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           children: [
             _buildHeader(),
-            _buildProfileSection(),
+            UserInformationHeader(),
             _buildHorizontalLine(),
             _buildNavigationBar(),
             _buildHorizontalLine(),
@@ -172,41 +168,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileSection() {
-    return Container(
-      color: Colors.grey[200],
-      padding: EdgeInsets.all(10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Text(
-            'اسم الشخص',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(width: 10),
-          GestureDetector(
-            onTap: _pickImage,
-            child: Stack(
-              alignment: Alignment.bottomRight,
-              children: [
-                CircleAvatar(
-                  radius: 80,
-                  backgroundImage: _profileImage != null
-                      ? MemoryImage(_profileImage!)
-                      : const AssetImage('assets/images/defaultpfp.jpg') as ImageProvider,
-                  child: _profileImage == null
-                      ? const Icon(Icons.camera_alt, size: 30, color: Colors.grey)
-                      : null,
-                ),
-                const Icon(Icons.edit, color: Color(0xFF0A1D47)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildHorizontalLine() {
     return Container(
       height: 2,
@@ -222,13 +183,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildNavItem('أفكاري', () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => MyIdeasScreen()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => MyIdeasScreen()));
           }),
           _buildNavItem('مشاريعي الناشئة', () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => MyStartupProjectsScreen()));
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => MyStartupProjectsScreen()));
           }),
           _buildNavItem('حسابي', () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => ProfileScreen()));
           }),
         ],
       ),
@@ -272,9 +238,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           SizedBox(height: 10),
           _buildGenderDropdown(),
           SizedBox(height: 10),
-          _buildEditableRow('رقم الهاتف', Icons.phone, _phoneController), // New phone field
+          _buildEditableRow('رقم الهاتف', Icons.phone, _phoneController),
+          // New phone field
           SizedBox(height: 10),
-          _buildEditableRowWithNavigation('كلمة المرور', Icons.edit, _passwordController, _goToEditPassword),
+          _buildEditableRowWithNavigation('كلمة المرور', Icons.edit,
+              _passwordController, _goToEditPassword),
           SizedBox(height: 20),
           _buildSaveButton(),
         ],
@@ -282,15 +250,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildEditableRow(String title, IconData icon, TextEditingController controller) {
+  Widget _buildEditableRow(
+      String title, IconData icon, TextEditingController controller) {
     return _buildRowWithIcon(title, icon, controller, false);
   }
 
-  Widget _buildEditableRowWithNavigation(String title, IconData icon, TextEditingController controller, VoidCallback onPressed) {
+  Widget _buildEditableRowWithNavigation(String title, IconData icon,
+      TextEditingController controller, VoidCallback onPressed) {
     return _buildRowWithIcon(title, icon, controller, true, onPressed);
   }
 
-  Widget _buildRowWithIcon(String title, IconData icon, TextEditingController controller, bool isReadOnly, [VoidCallback? onPressed]) {
+  Widget _buildRowWithIcon(String title, IconData icon,
+      TextEditingController controller, bool isReadOnly,
+      [VoidCallback? onPressed]) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -397,9 +369,11 @@ class EditPasswordPage extends StatefulWidget {
 }
 
 class _EditPasswordPageState extends State<EditPasswordPage> {
-  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool _isCurrentPasswordVisible = false;
   bool _isNewPasswordVisible = false;
@@ -459,19 +433,26 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 20),
-                _buildPasswordField('كلمة المرور الحالية', _currentPasswordController, _isCurrentPasswordVisible, (value) {
+                _buildPasswordField(
+                    'كلمة المرور الحالية',
+                    _currentPasswordController,
+                    _isCurrentPasswordVisible, (value) {
                   setState(() {
                     _isCurrentPasswordVisible = value;
                   });
                 }),
                 SizedBox(height: 20),
-                _buildPasswordField('كلمة المرور الجديدة', _newPasswordController, _isNewPasswordVisible, (value) {
+                _buildPasswordField('كلمة المرور الجديدة',
+                    _newPasswordController, _isNewPasswordVisible, (value) {
                   setState(() {
                     _isNewPasswordVisible = value;
                   });
                 }),
                 SizedBox(height: 20),
-                _buildPasswordField('تأكيد كلمة المرور', _confirmPasswordController, _isConfirmPasswordVisible, (value) {
+                _buildPasswordField(
+                    'تأكيد كلمة المرور',
+                    _confirmPasswordController,
+                    _isConfirmPasswordVisible, (value) {
                   setState(() {
                     _isConfirmPasswordVisible = value;
                   });
@@ -493,7 +474,8 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
     );
   }
 
-  Widget _buildPasswordField(String title, TextEditingController controller, bool isVisible, Function(bool) onVisibilityChanged) {
+  Widget _buildPasswordField(String title, TextEditingController controller,
+      bool isVisible, Function(bool) onVisibilityChanged) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [

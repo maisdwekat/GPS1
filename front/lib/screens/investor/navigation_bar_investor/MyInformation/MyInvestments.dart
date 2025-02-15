@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import '../../../../Investments/RequestFormUpdate.dart';
 import '../../homepageinvestor/HomePageScreeninvestor.dart';
 import 'MyAccount.dart';
-import 'RequestFormUpdate.dart';
-import 'Request_form.dart';
+import '../../../../Investments/Request_form.dart';
 
 class MyInvestmentsScreen extends StatefulWidget {
   @override

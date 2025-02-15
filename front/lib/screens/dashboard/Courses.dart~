@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../Controllers/CoursesController.dart';
+import '../../Controllers/token_controller.dart';
+import '../../constants.dart';
 import '../ContactUs/Chat.dart';
 import '../Welcome/welcome_screen.dart';
 import '../users/GrantsPage/GrantsPage.dart';
@@ -33,6 +35,50 @@ class _CoursesState extends State<Courses> {
     fetchCourses(); // جلب الدورات عند بدء الشاشة
   }
   List<dynamic> ideas = [];
+
+  Future<void> fetchCourses() async {
+    final savedToken =await token.getToken();
+    if (savedToken == null || savedToken.isEmpty) {
+      print("Error: Token is null or empty");
+      //return {'success': false, 'message': "Authentication token is missing"};
+    }
+    String tokenWithPrefix = 'token__$savedToken';
+    try{
+      final response = await http.get(
+        Uri.parse('http://$ip:4000/api/v1/EducationalCourse/all'),
+        headers: {
+          'Content-Type': 'application/json',
+          'token': tokenWithPrefix,},
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> jsonResponse = json.decode(response.body);
+        setState(() {
+          grants = (jsonResponse['getAll'] as List).map((grant) {
+            return {
+              '_id': grant['_id'],
+              'nameOfCompany': grant['nameOfCompany'],  // تعديل هنا
+              'nameOfGrant': grant['nameOfGrant'],  // تعديل هنا
+              'description': grant['description'],  // تعديل هنا
+              'DateOfEndoFGrant': grant['DateOfEndoFGrant'],  // تعديل هنا
+            };
+          }).toList();
+        });
+
+        print("$grants");
+      } else {
+        // يمكنك إضافة معالجة الأخطاء هنا
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('فشل في جلب البيانات')),
+        );
+      }} catch (error) {
+      print('Error: $error');
+      //return {'success': false, 'message': "An error occurred"};
+    }
+  }
+
+
+
 
   Future<void> fetchCourses() async {
     try {
@@ -246,11 +292,9 @@ class _CoursesState extends State<Courses> {
           _buildMenuItem(context, "الدورات", Courses()),
           _buildMenuItem(context, "أكثر المستخدمين نشاطًا", ActiveUsers()),
           _buildMenuItem(context, "الفيد باك", FeedbackPage()),
-          _buildMenuItem(context, "المنح", Grantpage()),
+          _buildMenuItem(context, "المنح", GrantsPage()),
           _buildMenuItem(context, "الاشعارات", Notifications()),
           _buildMenuItem(context, "الرسائل", ChatScreen()),
-          _buildMenuItem(context, "تسجيل خروج", WelcomeScreen()),
-
         ],
       ),
     );
@@ -263,13 +307,22 @@ class _CoursesState extends State<Courses> {
         style: TextStyle(color: Colors.white54),
       ),
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => page),
-        );
-      },
+        if (page is WelcomeScreen) {
+          TokenController tokenController=TokenController();
+          tokenController.logout();
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => page),(route) => false,);
+        }
+        else{
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => page),
+          );
+        }},
     );
   }
+
 
   Widget _buildMainContent(BuildContext context) {
     return Column(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ggg_hhh/screens/users/homepageUsers/HomePageScreenUsers.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http; // استيراد حزمة http
 import '../../../../../Controllers/BMCcontroller.dart';
@@ -7,9 +8,10 @@ import 'BMCform.dart';
 
 class CreateBusinessPlanScreen extends StatefulWidget {
   bool toUpdate = false;
+  String id;
 
-  CreateBusinessPlanScreen({super.key});
-  CreateBusinessPlanScreen.toUpdate({super.key,this.toUpdate=true});
+  CreateBusinessPlanScreen({super.key,required this.id});
+  CreateBusinessPlanScreen.toUpdate({super.key,this.toUpdate=true,required this.id});
 
   @override
   State<CreateBusinessPlanScreen> createState() => _CreateBusinessPlanScreenState();
@@ -40,7 +42,7 @@ class _CreateBusinessPlanScreenState extends State<CreateBusinessPlanScreen> {
     widget.toUpdate?_loadBusinessCanva():null;
   }
   Future<void> _loadBusinessCanva() async {
-    final result = await _bmcController.getBusinessCanva("67a4b85bdbe6cc6fd435b6f7");
+    final result = await _bmcController.getBusinessCanva(widget.id);
     if (result != null && result['success']) {
        data = result['data'];
 
@@ -77,6 +79,7 @@ class _CreateBusinessPlanScreenState extends State<CreateBusinessPlanScreen> {
     print('Revenue Streams: ${_revenueStreamsController.text}');
 
     await _bmcController.addBusinessCanva(
+      projectId: widget.id,
       keyPartners: _keyPartnersController.text,
       keyActivities: _keyActivitiesController.text,
       keyResources: _keyResourcesController.text,
@@ -157,10 +160,10 @@ class _CreateBusinessPlanScreenState extends State<CreateBusinessPlanScreen> {
                     _buildCancelButton(context),
                     SizedBox(width: 16),
                     _buildActionButton(context, label: 'تحويل الى خطة العمل', onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => BMCformscreen()),
-                      );
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(builder: (context) => BMCformscreen()),
+                      // );
                     }),
                     SizedBox(width: 16),
                     _buildSaveButton(context),
@@ -258,6 +261,7 @@ class _CreateBusinessPlanScreenState extends State<CreateBusinessPlanScreen> {
       ),
       child: TextButton(
         onPressed: () {
+
           print('زر الحفظ تم الضغط عليه!'); // طباعة رسالة عند الضغط على الزر
           if(widget.toUpdate == true){
             _updateBusinessCanva();
@@ -265,6 +269,11 @@ class _CreateBusinessPlanScreenState extends State<CreateBusinessPlanScreen> {
           else {
             _saveBusinessCanva();
           }
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => homepagescreen()),
+
+          );
         },
         child: Text(
           'حفظ',

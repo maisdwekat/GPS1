@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ggg_hhh/Controllers/date_controller.dart';
 import 'package:ggg_hhh/Controllers/token_controller.dart';
+import 'package:ggg_hhh/screens/users/homepageUsers/HomePageScreenUsers.dart';
 import 'package:image_picker/image_picker.dart'; // Import for image picking
 import 'package:http/http.dart' as http; // Import for HTTP requests
 import 'package:flutter/foundation.dart' show Uint8List, kIsWeb;
@@ -12,8 +14,13 @@ import '../../../../../Controllers/ProjectController.dart';
 import '../../../../../constants.dart';
 import 'CreateBusinessPlan.dart'; // تأكد من استيراد الصفحة التالية
 import 'dart:html' as html; // For web
-
+import 'package:http_parser/http_parser.dart';
 class AddStartupProjectScreen extends StatefulWidget {
+  bool toUpdate = false;
+  String? projectID ;
+
+  AddStartupProjectScreen({super.key});
+  AddStartupProjectScreen.toUpdate({super.key,this.toUpdate=true,required this.projectID});
   @override
   _AddStartupProjectScreenState createState() =>
       _AddStartupProjectScreenState();
@@ -28,6 +35,8 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController websiteController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController dateController = TextEditingController();
+
   String? creationDate; // لتخزين تاريخ الإنشاء (يمكن أن يكون نصًا)
   String? isoDate; // لتخزين التاريخ بالتنسيق المطلوب
   DateTime dateTime = DateTime.now();
@@ -39,11 +48,30 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
 
   // استدعاء ProjectController
   final TokenController token = TokenController();
+  getdata() async {
+    var data = await ProjectController().getByIdForUser(widget.projectID!);
+    setState(() {
+      titleController.text = data!['title'];
+      websiteController.text = data['website'];
+      emailController.text = data['email'];
+      shortDescriptionController.text = data['description'];
+      summaryController.text = data['summary'];
+      creationDate = data['date'];
+      selectedCity = data['location'];
+      selectedProjectField = data['category'];
+      selectedStage = data['current_stage'];
+      selectedVisibility = data['isPublic'];
+      imagePath = data['image'];
+    });
+    print(data);
+  }
 
   @override
   void initState() {
     super.initState();
-    token.getToken(); // استدعاء الدالة للحصول على التوكن
+    if(widget.toUpdate){
+      getdata();
+    }else{}
     shortDescriptionController.addListener(() {
       setState(() {
         shortDescriptionLength = shortDescriptionController.text.length;
@@ -55,7 +83,7 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
       });
     });
   }
-
+  final formKey=GlobalKey<FormState>();
   final ImagePicker _picker = ImagePicker();
   String? imagePath; // Path of the selected image
   Uint8List imageBytes = Uint8List(0); // Bytes of the selected image
@@ -70,6 +98,7 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
 
       input.onChange.listen((event) async {
         final file = input.files!.first; // Get the selected file
+        print("📂 File selected (Web): ${file.name}");
         final reader = html.FileReader();
 
         reader.onLoadEnd.listen((event) async {
@@ -83,7 +112,9 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
             'image',
             imageBytes,
             filename: file.name,
+            contentType: MediaType('image', 'png'),
           );
+          print("📂 Image file created for Web with size: ${imageBytes.length} bytes");
         });
 
         reader.readAsArrayBuffer(file); // Read the file as bytes
@@ -198,6 +229,12 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
   //     );
   //   }
   // }
+  bool isValidEmail(String email) {
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
+    return emailRegex.hasMatch(email);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -206,143 +243,195 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
         backgroundColor: kPrimaryColor,
       ),
       body: Center(
-        child: SingleChildScrollView(
-          child: Container(
-            color: Colors.grey[200],
-            padding: EdgeInsets.all(20),
-            margin: EdgeInsets.symmetric(vertical: 20, horizontal: 150),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  'إضافة مشروع ناشئ',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.right,
-                ),
-                SizedBox(height: 20),
-                Text(
-                  'تنويه: جميع الحقول مطلوبة حتى يتم نشر المشروع',
-                  style: TextStyle(color: Colors.red),
-                  textAlign: TextAlign.right,
-                ),
-                SizedBox(height: 20),
-                _buildLabeledTextField('اسم المشروع',
-                    controller: titleController, maxLines: 1),
-                SizedBox(height: 10),
-                Text('ما هو مجال المشروع',
+        child: Form(
+          key:formKey ,
+          child: SingleChildScrollView(
+            child: Container(
+              color: Colors.grey[200],
+              padding: EdgeInsets.all(20),
+              margin: EdgeInsets.symmetric(vertical: 20, horizontal: 150),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'إضافة مشروع ناشئ',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.right,
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                _buildDropdownField(),
-                SizedBox(height: 10),
-                Text('تاريخ إنشاء المشروع',
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    'تنويه: جميع الحقول مطلوبة حتى يتم نشر المشروع',
+                    style: TextStyle(color: Colors.red),
                     textAlign: TextAlign.right,
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Container(width: 120, child: _buildDateInputField()),
-                  ],
-                ),
-                SizedBox(height: 10),
-                Text('اختر المدينة',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                _buildCityDropdown(),
-                SizedBox(height: 10),
-                SizedBox(height: 20),
-                Text('المرحلة الحالية للمشروع',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                _buildStageDropdownField(),
-                SizedBox(height: 10),
-                SizedBox(height: 30),
-                _buildLabeledTextField('شرح مبسط عن المشروع',
-                    maxLength: 140,
-                    maxLines: 3,
-                    controller: shortDescriptionController),
-                SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Text('$shortDescriptionLength/140',
-                      style: TextStyle(color: Colors.grey)),
-                ),
-                SizedBox(height: 20),
-                _buildLabeledTextField('الموقع الإلكتروني',
-                    controller: websiteController, maxLines: 1),
-                SizedBox(height: 30),
-                _buildLabeledTextField('الإيميل',
-                    controller: emailController, maxLines: 1),
-                SizedBox(height: 20),
-                Text('أضف صورة لمشروعك',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                SizedBox(height: 10),
-                _buildImageUploadField(),
-                SizedBox(height: 30),
-                _buildVisibilityDropdown(),
-                _buildLabeledTextField('ملخص عن المشروع',
-                    maxLines: 5,
-                    maxLength: 2000,
-                    controller: summaryController),
-                SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Text('$summaryLength/2000',
-                      style: TextStyle(color: Colors.grey)),
-                ),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    SizedBox(
-                      width: 150,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Text('إلغاء'),
+                  ),
+                  SizedBox(height: 20),
+                  _buildLabeledTextField('اسم المشروع',
+                      controller: titleController, maxLines: 1),
+                  SizedBox(height: 10),
+                  Text('ما هو مجال المشروع',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  _buildDropdownField(),
+                  SizedBox(height: 10),
+                  Text('تاريخ إنشاء المشروع',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(width: 120, child: _buildDateInputField()),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                  Text('اختر المدينة',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  _buildCityDropdown(),
+                  SizedBox(height: 10),
+                  SizedBox(height: 20),
+                  Text('المرحلة الحالية للمشروع',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  _buildStageDropdownField(),
+                  SizedBox(height: 10),
+                  SizedBox(height: 30),
+                  _buildLabeledTextField('شرح مبسط عن المشروع',
+                      maxLength: 140,
+                      maxLines: 3,
+                      controller: shortDescriptionController),
+                  SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text('$shortDescriptionLength/140',
+                        style: TextStyle(color: Colors.grey)),
+                  ),
+                  SizedBox(height: 20),
+                  _buildLabeledTextField('الموقع الإلكتروني',
+                      controller: websiteController, maxLines: 1),
+                  SizedBox(height: 30),
+                  _buildLabeledTextField('الإيميل',
+                      controller: emailController, maxLines: 1,validation:(value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter an email';
+                      }
+                      if (!isValidEmail(value)) {
+                        return 'Please enter a valid email';
+                      }
+                      return null;
+                    },),
+                  SizedBox(height: 20),
+                  widget.toUpdate?SizedBox():Text('أضف صورة لمشروعك',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  SizedBox(height: 10),
+                  widget.toUpdate?_buildImageToUpdate() as Widget:_buildImageUploadField() as Widget,
+                  SizedBox(height: 30),
+                  // _buildVisibilityDropdown(),
+                  _buildLabeledTextField('ملخص عن المشروع',
+                      maxLines: 5,
+                      maxLength: 2000,
+                      controller: summaryController,
+                  ),
+                  SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text('$summaryLength/2000',
+                        style: TextStyle(color: Colors.grey)),
+                  ),
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        width: 150,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text('إلغاء'),
+                        ),
                       ),
-                    ),
-                    // SizedBox(
-                    //   width: 150,
-                    //   child: ElevatedButton(
-                    //     onPressed: () {
-                    //     },
-                    //     child: Text('حفظ'),
-                    //   ),
-                    // ),
-                    SizedBox(
-                      width: 150,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          ProjectController projectController =
-                              ProjectController();
-                          projectController.addProject(
-                              title: titleController.text,
-                              description: shortDescriptionController.text,
-                              current_stage: selectedStage!,
-                              isPublic: selectedVisibility ?? true,
-                              location: selectedCity!,
-                              category: selectedProjectField!,
-                              website: websiteController.text,
-                              email: emailController.text,
-                              summary: summaryController.text,
-                              date: dateTime.toString(),
-                              imageFile: imageFile!);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    CreateBusinessPlanScreen()), // الانتقال إلى صفحة BMC
-                          );
-                        },
-                        child: Text('التالي'),
+                      // SizedBox(
+                      //   width: 150,
+                      //   child: ElevatedButton(
+                      //     onPressed: () {
+                      //     },
+                      //     child: Text('حفظ'),
+                      //   ),
+                      // ),
+                      SizedBox(
+                        width: 150,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            ProjectController projectController = ProjectController();
+
+                            // استدعاء الدالة والحصول على النتيجة
+                               if(formKey.currentState!.validate()) {
+                              if (widget.toUpdate) {
+                                dynamic res =
+                                    await projectController.updateproject(
+                                  widget.projectID!,
+                                  titleController.text,
+                                  shortDescriptionController.text,
+                                  selectedStage!,
+                                  selectedVisibility ?? true,
+                                  selectedCity!,
+                                  selectedProjectField!,
+                                  websiteController.text,
+                                  emailController.text,
+                                  summaryController.text,
+                                  dateTime.toString(),
+                                );
+                                if (res['message'] == 'Success') {
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => homepagescreen(),
+                                    ),
+                                    (route) => false,
+                                  );
+                                } else {
+                                  print('خطأ: ${res['message']}');
+                                }
+                              } else {
+                                Map<String, dynamic> response =
+                                    await projectController.addProject(
+                                  title: titleController.text,
+                                  description: shortDescriptionController.text,
+                                  current_stage: selectedStage!,
+                                  isPublic: selectedVisibility ?? true,
+                                  location: selectedCity!,
+                                  category: selectedProjectField!,
+                                  website: websiteController.text,
+                                  email: emailController.text,
+                                  summary: summaryController.text,
+                                  date: dateTime.toString(),
+                                  imageFile: imageFile!,
+                                );
+
+                                // التحقق مما إذا كانت العملية ناجحة
+                                if (response['success'] == true) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            CreateBusinessPlanScreen(
+                                              id: response['data']['project']
+                                                  ['_id'],
+                                            )),
+                                  );
+                                } else {}
+                              }
+                            }
+                          },
+                          child: Text(widget.toUpdate?'حفظ':'التالي'),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -387,7 +476,7 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
   }
 
   Widget _buildLabeledTextField(String label,
-      {int maxLines = 1, int? maxLength, TextEditingController? controller}) {
+      {int maxLines = 1, int? maxLength, TextEditingController? controller ,var validation}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -408,6 +497,7 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
             ],
           ),
           child: TextFormField(
+            validator: validation,
             controller: controller,
             maxLines: maxLines,
             maxLength: maxLength,
@@ -440,7 +530,7 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
               'مالي وخدمات الدفع',
               'موسيقى وترفيه',
               'أمن إلكتروني',
-              'صحة',
+              'الصحة',
               'نقل وتوصيل',
               'تصنيع',
               'منصة إعلانية',
@@ -536,23 +626,42 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
             ],
           ),
           child: TextField(
+            controller: dateController,
             onChanged: (value) {
-              // Validate if the input is in the format YYYY-MM-DD
-              RegExp regExp = RegExp(r'^\d{4}-\d{2}-\d{2}$');
-              if (value.isNotEmpty && regExp.hasMatch(value)) {
-                setState(() {
-                  creationDate = value; // Store the valid date
-                });
-                print('تم اختيار تاريخ صالح: $creationDate');
-                // DateTime dateTime = DateFormat('yyyy-MM-dd').parse(value);
-                // String isoDate = dateTime.toUtc().toIso8601String();
-                // dateTime = DateTime.parse(value);  // تحديث dateTime بالقيمة المدخلة
-                // isoDate = dateTime.toUtc().toIso8601String().replaceAll('Z', '+00:00');
-                // print('تم اختيار تاريخ صالح: $isoDate');
-              } else {
-                // Optionally show an error message or handle invalid input
-                print('Invalid date format. Please use YYYY-MM-DD.');
+              // // Validate if the input is in the format YYYY-MM-DD
+              // RegExp regExp = RegExp(r'^\d{4}-\d{2}-\d{2}$');
+              // if (value.isNotEmpty && regExp.hasMatch(value)) {
+              //   setState(() {
+              //     creationDate = value; // Store the valid date
+              //   });
+              //   print('تم اختيار تاريخ صالح: $creationDate');
+              //   // DateTime dateTime = DateFormat('yyyy-MM-dd').parse(value);
+              //   // String isoDate = dateTime.toUtc().toIso8601String();
+              //   // dateTime = DateTime.parse(value);  // تحديث dateTime بالقيمة المدخلة
+              //   // isoDate = dateTime.toUtc().toIso8601String().replaceAll('Z', '+00:00');
+              //   // print('تم اختيار تاريخ صالح: $isoDate');
+              // } else {
+              //   // Optionally show an error message or handle invalid input
+              //   print('Invalid date format. Please use YYYY-MM-DD.');
+              // }
+            },
+            readOnly: true,
+            onTap: () {
+               showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2100),
+              ).then((selectedDate) {
+                if (selectedDate != null) {
+                  setState(() {
+                    creationDate =selectedDate.toString();
+                    dateController.text = dateFormater(selectedDate);
+                    
+                  });
+                }
               }
+              );
             },
             textAlign: TextAlign.right,
             decoration: InputDecoration(
@@ -578,17 +687,40 @@ class _AddStartupProjectScreenState extends State<AddStartupProjectScreen> {
           ),
           child: imagePath == null
               ? Center(
-                  child: Icon(
-                    Icons.camera_alt,
-                    color: Colors.grey,
-                    size: 50,
-                  ),
-                )
+            child: Icon(
+              Icons.camera_alt,
+              color: Colors.grey,
+              size: 50,
+            ),
+          )
               : ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.memory(imageBytes, fit: BoxFit.cover),
-                ),
+            borderRadius: BorderRadius.circular(8),
+            child: Image.memory(imageBytes, fit: BoxFit.cover),
+          ),
         ));
+  }
+  Widget _buildImageToUpdate() {
+    return Container(
+      width: 150,
+      height: 150,
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey),
+      ),
+      child: imagePath == null
+          ? Center(
+        child: Icon(
+          Icons.camera_alt,
+          color: Colors.grey,
+          size: 50,
+        ),
+      )
+          : ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(imagePath!, fit: BoxFit.cover),
+      ),
+    );
   }
 
 // دالة لتحويل الملف إلى Uint8List لعرضه في الويب

@@ -1,17 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:ggg_hhh/Controllers/ProjectController.dart';
+import 'package:ggg_hhh/Widget/bmc_widget.dart';
+import '../../../../../Controllers/date_controller.dart';
+import '../../../../../Investments/InvestmentModel.dart';
 import '../../../../ChatForInquiries/ChatForInquiries.dart';
 import '../../../../basic/footer.dart';
 import '../../../../basic/header.dart';
+import '../../../../investor/navigation_bar_investor/Drawerinvestor/Drawerinvestor.dart';
+import '../../../../investor/navigation_bar_investor/NavigationBarinvestor.dart';
 import '../../DrawerUsers/DrawerUsers.dart';
 import '../../NavigationBarUsers.dart';
 
 class ProjectInformationScreen extends StatefulWidget {
+  String projectId;
+  bool isInvestor = false;
+  ProjectInformationScreen({required this.projectId});
+  ProjectInformationScreen.toInvestor({required this.projectId,this.isInvestor=true});
+
   @override
-  _ProjectInformationScreenState createState() => _ProjectInformationScreenState();
+  _ProjectInformationScreenState createState() =>
+      _ProjectInformationScreenState();
 }
 
 class _ProjectInformationScreenState extends State<ProjectInformationScreen> {
   Widget? _selectedContent; // تغيير إلى نوع Widget?
+  ProjectController projectController = ProjectController();
+  dynamic project;
+  int _selectedStar = 0; // لتحفظ رقم النجمة المحددة
+
+
+  getproject() async {
+    project = await projectController.getSpecificProject(widget.projectId);
+    setState(() {});
+  }
 
   void _updateContent(Widget content) {
     setState(() {
@@ -22,33 +43,44 @@ class _ProjectInformationScreenState extends State<ProjectInformationScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
+  void initState() {
+    getproject();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
         backgroundColor: Color(0xFF0A1D47),
       ),
-      drawer: DrawerUsers(scaffoldKey: _scaffoldKey), // استدعاء Drawer
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            HeaderScreen(), // استدعاء الهيدر
-            NavigationBarUsers(
-              scaffoldKey: _scaffoldKey,
-              onSelectContact: (value) {
-                // منطق لتحديد جهة الاتصال
-              },
+      drawer: widget.isInvestor?Drawerinvestor(scaffoldKey: _scaffoldKey):DrawerUsers(scaffoldKey: _scaffoldKey), // استدعاء Drawer
+      body: project == null
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  HeaderScreen(), // استدعاء الهيدر
+                  widget.isInvestor? NavigationBarinvestor(
+                    scaffoldKey: _scaffoldKey,
+                    onSelectContact: (value) {
+                      // منطق لتحديد جهة الاتصال
+                    },
+                  ):NavigationBarUsers(
+                    onSelectContact: (value) {
+                      _scaffoldKey.currentState!.openDrawer();
+                    },
+                  ),
+                  const SizedBox(height: 40),
+                  _buildMainContent(),
+                  const SizedBox(height: 40),
+                  Footer(),
+                ],
+              ),
             ),
-            const SizedBox(height: 40),
-            _buildMainContent(),
-            const SizedBox(height: 40),
-            Footer(),
-          ],
-        ),
-      ),
     );
   }
-
 
   void _showChatDialog(BuildContext context) {
     showDialog(
@@ -62,7 +94,7 @@ class _ProjectInformationScreenState extends State<ProjectInformationScreen> {
               child: Container(
                 width: 400,
                 height: 600, // يمكنك تعديل الحجم كما تحتاج
-                child: ChatForInquiriesScreen(), // استبدل هذا بالمحتوى الخاص بك
+                child: ChatForInquiriesScreen(id: '',), // استبدل هذا بالمحتوى الخاص بك
               ),
             ),
           ],
@@ -70,7 +102,6 @@ class _ProjectInformationScreenState extends State<ProjectInformationScreen> {
       },
     );
   }
-
 
   Widget _buildMainContent() {
     return Column(
@@ -87,10 +118,59 @@ class _ProjectInformationScreenState extends State<ProjectInformationScreen> {
           ],
         ),
         SizedBox(height: 20),
+        widget.isInvestor?_buildActionButtons():Container(),
       ],
     );
   }
+  Widget _buildActionButton(String title, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap, // إضافة وظيفة عند الضغط
+      child: Container(
+        width: 200,
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.green,
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Center(
+          child: Text(
+            title,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
+  Widget _buildActionButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        SizedBox(width: 8),
+        _buildActionButton('تنزيل نموذج الاستثمار', () {
+          // وظيفة تنزيل نموذج الاستثمار
+        }),
+        SizedBox(width: 8),
+        _buildActionButton('استفسر الآن', () {
+          _showChatDialog(context); // استدعاء نافذة الدردشة هنا
+        }),
+        SizedBox(width: 8),
+        _buildActionButton('تقديم طلب استثمار', () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => InvestmentRequestFormScreen()),
+          );
+          // وظيفة تقديم طلب استثمار
+        }),
+        SizedBox(width: 8),
+      ],
+    );
+  }
 
   Widget _buildProjectDetails() {
     return Container(
@@ -145,7 +225,7 @@ class _ProjectInformationScreenState extends State<ProjectInformationScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          _buildAboutSection('صاحب المشروع', 'أحمد محمد', 20, 18),
+          _buildAboutSection('صاحب المشروع', project['name'], 20, 18),
           _buildAboutSection(
             'البريد الإلكتروني',
             GestureDetector(
@@ -153,8 +233,9 @@ class _ProjectInformationScreenState extends State<ProjectInformationScreen> {
                 _showChatDialog(context);
               },
               child: Text(
-                'ahmed@example.com',
-                style: TextStyle(fontSize: 16,
+                project['email'],
+                style: TextStyle(
+                    fontSize: 16,
                     color: Colors.blue,
                     decoration: TextDecoration.underline),
               ),
@@ -162,13 +243,14 @@ class _ProjectInformationScreenState extends State<ProjectInformationScreen> {
             16,
             16,
           ),
-          _buildAboutSection(' الموقع الالكتروني ',
+          _buildAboutSection(
+              ' الموقع الالكتروني ',
               GestureDetector(
                 onTap: () {
                   // يمكنك إضافة وظيفة هنا لفتح الموقع عند الضغط
                 },
                 child: Text(
-                  'www.example.com',
+                  project['website'],
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.blue,
@@ -177,21 +259,19 @@ class _ProjectInformationScreenState extends State<ProjectInformationScreen> {
                 ),
               ),
               16,
-              14
-          ),
-          _buildProgressSection('تاريخ الإنشاء', '2024', 20, 18),
+              14),
+          _buildProgressSection(
+              'تاريخ الإنشاء', ConvertDateAndFormate(project['date']), 20, 18),
           _buildProgressSectionWithProgress(
-              'المرحلة الحالية', 'مرحلة التحقق والتخطيط', 20, 18, 0.4),
-          _buildAboutSection('نبذة عن المشروع',
-              'يطمح المشروع إلى تحقيق نتائج ملموسة تسهم في تحسين العمليات المختلفة...',
-              16, 14),
+              'المرحلة الحالية', project['current_stage'], 20, 18, 0.4),
+          _buildAboutSection('نبذة عن المشروع', project['summary'], 16, 14),
         ],
       ),
     );
   }
 
-  Widget _buildAboutSection(String title, dynamic content, double titleSize,
-      double contentSize) {
+  Widget _buildAboutSection(
+      String title, dynamic content, double titleSize, double contentSize) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -204,12 +284,12 @@ class _ProjectInformationScreenState extends State<ProjectInformationScreen> {
         content is Widget
             ? content
             : Text(
-          content,
-          style: TextStyle(fontSize: contentSize),
-          textAlign: TextAlign.right,
-          maxLines: null,
-          overflow: TextOverflow.visible,
-        ),
+                content,
+                style: TextStyle(fontSize: contentSize),
+                textAlign: TextAlign.right,
+                maxLines: null,
+                overflow: TextOverflow.visible,
+              ),
         SizedBox(height: 10),
       ],
     );
@@ -260,7 +340,9 @@ class _ProjectInformationScreenState extends State<ProjectInformationScreen> {
       ],
     );
   }
-  Widget _buildProgressSection(String title, String year, double titleSize, double contentSize) {
+
+  Widget _buildProgressSection(
+      String title, String year, double titleSize, double contentSize) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -283,7 +365,6 @@ class _ProjectInformationScreenState extends State<ProjectInformationScreen> {
     );
   }
 
-
   ////////////////////////////////////////////////////
 
   Widget _buildBusinessModelContent(BuildContext context) {
@@ -292,54 +373,26 @@ class _ProjectInformationScreenState extends State<ProjectInformationScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end, // لمحاذاة المحتوى إلى اليمين
         children: [
-          GestureDetector(
-            onTap: () {
-              // عرض الصورة بحجم أكبر عند الضغط عليها
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return Dialog(
-                    child: Container(
-                      width: 800,
-                      // عرض الصورة في النافذة المنبثقة (يمكنك تعديل القيم)
-                      height: 400,
-                      // ارتفاع الصورة في النافذة المنبثقة (يمكنك تعديل القيم)
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.asset(
-                          'assets/images/111.jpg', // استبدل بمسار الصورة الصحيح
-                          fit: BoxFit.cover, // لتغطية المربع بالكامل
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-            child: Container(
-              width: 600, // عرض الصورة 600
-              height: 300, // يمكنك ضبط الارتفاع حسب الحاجة
-              decoration: BoxDecoration(
-                color: Colors.white, // لون خلفية المربع
-                borderRadius: BorderRadius.circular(10), // زوايا دائرية للمربع
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 4.0,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10), // زوايا دائرية للصورة
-                child: Image.asset(
-                  'assets/images/111.jpg', // استبدل بمسار الصورة الصحيح
-                  width: 600, // عرض الصورة 600
-                  height: 300, // ارتفاع الصورة
-                  fit: BoxFit.cover, // لتغطية المربع بالكامل
+          Container(
+            width: 600, // عرض الصورة 600
+            height: 300, // يمكنك ضبط الارتفاع حسب الحاجة
+            decoration: BoxDecoration(
+              color: Colors.white, // لون خلفية المربع
+              borderRadius: BorderRadius.circular(10), // زوايا دائرية للمربع
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 4.0,
+                  offset: Offset(0, 2),
                 ),
-              ),
+              ],
             ),
+            child: ClipRRect(
+                borderRadius: BorderRadius.circular(10), // زوايا دائرية للصورة
+                child: BmcWidget.pre(
+                  id: widget.projectId,
+                  isPre: true,
+                )),
           ),
         ],
       ),
@@ -356,7 +409,8 @@ class _ProjectInformationScreenState extends State<ProjectInformationScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Text(
           title,
-          style: TextStyle(fontSize: 16,
+          style: TextStyle(
+              fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Color(0xFF001F3F)),
         ),
@@ -391,20 +445,22 @@ class _ProjectInformationScreenState extends State<ProjectInformationScreen> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               image: DecorationImage(
-                image: AssetImage('assets/images/p1 (2).jpeg'),
+                image: NetworkImage(
+                  project['image'],
+                ),
                 fit: BoxFit.cover,
               ),
             ),
           ),
           SizedBox(height: 15),
           Text(
-            'اسم المشروع',
+            project['title'].toString(),
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 10),
           Text(
-            'مجال المشروع',
+            project['category'],
             style: TextStyle(fontSize: 16, color: Colors.grey),
             textAlign: TextAlign.center,
           ),
@@ -416,12 +472,36 @@ class _ProjectInformationScreenState extends State<ProjectInformationScreen> {
           ),
           SizedBox(height: 15),
           Text(
-            'وصف مختصر',
+            project['description'],
             style: TextStyle(fontSize: 14, color: Colors.green),
             textAlign: TextAlign.center,
           ),
+          SizedBox(height: 15),
+         widget.isInvestor? _buildRatingStars():SizedBox(), // إضافة النجوم هنا
+
         ],
       ),
+    );
+  }
+
+  Widget _buildRatingStars() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(5, (index) {
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              _selectedStar = index + 1; // تعيين رقم النجمة المحددة
+            });
+          },
+          child: Icon(
+            Icons.star,
+            color: index < _selectedStar ? Colors.orange : Colors.grey[350],
+            // تغيير اللون حسب التحديد
+            size: 30,
+          ),
+        );
+      }),
     );
   }
 }

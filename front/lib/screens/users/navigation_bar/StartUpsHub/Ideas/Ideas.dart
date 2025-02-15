@@ -3,12 +3,17 @@ import 'package:ggg_hhh/Controllers/ideaController.dart';
 import '../../../../../constants.dart';
 import '../../../../basic/footer.dart';
 import '../../../../basic/header.dart';
+import '../../../../investor/navigation_bar_investor/NavigationBarinvestor.dart';
 import '../../DrawerUsers/DrawerUsers.dart';
+import '../../MyInformation/MyIdeas/PreviewIdea.dart';
 import '../../NavigationBarUsers.dart';
-import 'IdeasInformation.dart';
 
 class IdeasScreen extends StatefulWidget {
-  const IdeasScreen({super.key});
+  bool isInvestor = false;
+
+  IdeasScreen({super.key});
+
+  IdeasScreen.invstor({super.key, this.isInvestor=true});
 
   @override
   _IdeasScreenState createState() => _IdeasScreenState();
@@ -23,11 +28,8 @@ class _IdeasScreenState extends State<IdeasScreen> {
   IdeaController idea = IdeaController();
 
   getAllIdea() async {
-
     ideas = await idea.getAllIdeas();
-    setState(() {
-
-    });
+    setState(() {});
   }
 
   @override
@@ -48,10 +50,9 @@ class _IdeasScreenState extends State<IdeasScreen> {
         child: Column(
           children: [
             HeaderScreen(), // استدعاء الهيدر
-            NavigationBarUsers(
-              scaffoldKey: _scaffoldKey,
+            widget.isInvestor?NavigationBarinvestor(scaffoldKey: _scaffoldKey, onSelectContact: (String ) {  },):NavigationBarUsers(
               onSelectContact: (value) {
-                // منطق لتحديد جهة الاتصال
+                _scaffoldKey.currentState!.openDrawer();
               },
             ),
             const SizedBox(height: 20),
@@ -157,18 +158,9 @@ class _IdeasScreenState extends State<IdeasScreen> {
               // أيقونة التعليقات
               Column(
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.comment, color: kPrimaryColor),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => IdeasInformationScreen()),
-                      );
-                    },
-                  ),
+                  Icon(Icons.comment, color: kPrimaryColor),
                   Text(
-                    '${10}', // عدد التعليقات
+                    '${item['comments'].length}', // عدد التعليقات
                     style: TextStyle(fontSize: 12), // حجم النص
                   ),
                 ],
@@ -177,29 +169,14 @@ class _IdeasScreenState extends State<IdeasScreen> {
               // أيقونة الإعجاب
               Column(
                 children: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.favorite,
-                      // color: item['isLiked']
-                      //     ? Colors.red
-                      //     : kPrimaryColor, // تغيير اللون حسب حالة الإعجاب
-                    ),
-                    onPressed: () {
-                      // setState(() {
-                      //   item['isLiked'] =
-                      //       !item['isLiked']; // تغيير حالة الإعجاب
-                      //   if (item['isLiked']) {
-                      //     item['likesCount']++; // زيادة عدد الإعجابات
-                      //   } else {
-                      //     item['likesCount']--; // تقليل عدد الإعجابات
-                      //   }
-                      // });
-                    },
+                  Icon(
+                    Icons.favorite,
+                    color: kPrimaryColor, // تغيير اللون حسب حالة الإعجاب
                   ),
-                  // Text(
-                  //   '${item['likesCount']}', // عدد الإعجابات
-                  //   style: TextStyle(fontSize: 12), // حجم النص
-                  // ),
+                  Text(
+                    '${item['likes'].length}', // عدد الإعجابات
+                    style: TextStyle(fontSize: 12), // حجم النص
+                  ),
                 ],
               ),
             ],
@@ -208,11 +185,25 @@ class _IdeasScreenState extends State<IdeasScreen> {
           // زر المزيد من المعلومات
           ElevatedButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => IdeasInformationScreen()),
-              );
+              if (widget.isInvestor) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => PreviewIdeaScreen.toInfo(
+                            ideaId: item['_id'],
+                            role: 'investor',
+                          )),
+                );
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => PreviewIdeaScreen.toInfo(
+                            ideaId: item['_id'],
+                            role: 'user',
+                          )),
+                );
+              }
             },
             child: Text('المزيد من المعلومات'),
             style: ElevatedButton.styleFrom(

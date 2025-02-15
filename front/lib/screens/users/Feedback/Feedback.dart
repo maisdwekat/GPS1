@@ -14,7 +14,7 @@ class FeedbackPage extends StatefulWidget {
 }
 
 class _FeedbackPageState extends State<FeedbackPage> {
- FeedbackController feedbackController = FeedbackController();
+  FeedbackController feedbackController = FeedbackController();
   // void _submitFeedback() async {
   //   if (_formKey.currentState!.validate()) {
   //     final email = _emailController.text;
@@ -92,15 +92,14 @@ class _FeedbackPageState extends State<FeedbackPage> {
           children: [
             HeaderScreen(), // استدعاء الهيدر
             NavigationBarUsers(
-              scaffoldKey: _scaffoldKey,
               onSelectContact: (value) {
-                // منطق لتحديد جهة الاتصال
+                _scaffoldKey.currentState!.openDrawer();
               },
             ),
-              const SizedBox(height: 40),
-              _buildFeedbackForm(),
-              const SizedBox(height: 40),
-              Footer(), // استدعاء الفوتر
+            const SizedBox(height: 40),
+            _buildFeedbackForm(),
+            const SizedBox(height: 40),
+            Footer(), // استدعاء الفوتر
           ],
         ),
       ),
@@ -195,8 +194,18 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   const SizedBox(height: 20),
                   Center( // وضع الزر في المنتصف
                     child: ElevatedButton(
-                      onPressed: ()async{
-                        await feedbackController.addFeedback(_feedbackController.text);
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) { // التحقق من صحة النموذج
+                          await feedbackController.addFeedback(_feedbackController.text);
+
+                          // إظهار رسالة نجاح
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('تم إرسال الفيدباك بنجاح!')),
+                          );
+
+                          // مسح النص في حقل الإدخال
+                          _feedbackController.clear();
+                        }
                       },
                       child: Text('إرسال الفيدباك'),
                       style: ElevatedButton.styleFrom(

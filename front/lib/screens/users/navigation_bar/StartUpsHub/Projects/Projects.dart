@@ -1,59 +1,79 @@
 import 'package:flutter/material.dart';
+import '../../../../../Controllers/ProjectController.dart';
 import '../../../../basic/footer.dart';
 import '../../../../basic/header.dart';
+import '../../../../investor/navigation_bar_investor/Drawerinvestor/Drawerinvestor.dart';
+import '../../../../investor/navigation_bar_investor/NavigationBarinvestor.dart';
 import '../../DrawerUsers/DrawerUsers.dart';
 import '../../NavigationBarUsers.dart';
 import 'ProjectInformation.dart';
 import 'package:ggg_hhh/responsive.dart';
 
 class ProjectsScreen extends StatefulWidget {
-  const ProjectsScreen({super.key});
+  bool isInvestor = false;
+  ProjectsScreen({super.key});
+  ProjectsScreen.investor({super.key, this.isInvestor=true});
 
   @override
   _ProjectsScreenState createState() => _ProjectsScreenState();
+
 }
 
 class _ProjectsScreenState extends State<ProjectsScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+   ProjectController projectController = ProjectController();
   bool _isSearchVisible = false; // للتحكم في ظهور قائمة البحث
   String? _selectedCity;
   String? _selectedField;
   String? _selectedStage;
+  final List<dynamic> projects = [];
+   List<dynamic> filteredProjects   = [];
+
+  getProjects() async {
+    await projectController.getAllProjects().then((value) => projects.addAll(value));
+    setState(() {
+
+    });
+  }
+  getFilteredProjects(){
+    print(_isSearchVisible);
+    print(_selectedCity);
+    print(_selectedField);
+    print(_selectedStage);
+    filteredProjects=projects;
+
+    if(_isSearchVisible){
+      if(_selectedCity!=null){
+
+        filteredProjects=filteredProjects.where((element) => element['location']==_selectedCity,).toList();
+
+      }
+      if(_selectedField!=null){
+        filteredProjects=filteredProjects.where((element) => element['category']==_selectedField,).toList();
+      }
+      if(_selectedStage!=null){
+        filteredProjects=filteredProjects.where((element) => element['current_stage']==_selectedStage,).toList();
+
+      }
+      setState(() {
+
+      });
+    }
+
+  }
+  @override
+  void initState() {
+    print('must be working ');
+    getProjects();
+    getFilteredProjects();
+
+    super.initState();
+  }
 
 
 
-  final List<Map<String, String>> projects = [
-    {
-      'title': 'حلول الزراعة الذكية',
-      "description": "مشروع يهدف إلى تحسين تقنيات الزراعة.\nنركز على استخدام التكنولوجيا لزيادة الإنتاجية.",
-      'image': 'assets/images/p1 (1).jpeg',
-    },
-    {
-      'title': 'تطوير التطبيقات الذكية',
-      "description": "مشروع لتطوير تطبيقات الذكاء الاصطناعي.\nنقدم حلولاً مبتكرة لتحسين الكفاءة.",
-      'image': 'assets/images/p1 (6).jpeg',
-    },
-    {
-      'title': 'تعليم مبتكر',
-      "description": "مشروع للابتكار في مجال التعليم.\nنهدف إلى تعزيز تجربة التعلم باستخدام التكنولوجيا.",
-      'image': 'assets/images/p1 (5).jpeg',
-    },
-    {
-      'title': 'Sustainable Travel Solutions',
-      "description": "مشروع لتنمية السياحة المستدامة.\nنركز على الحفاظ على البيئة وتعزيز الثقافة المحلية.",
-      'image': 'assets/images/p1 (4).jpeg',
-    },
-    {
-      'title': 'الطاقة الخضراء',
-      "description": "مشروع لتطوير الطاقة المتجددة.\nنركز على توفير حلول طاقة نظيفة ومستدامة.",
-      'image': 'assets/images/p1 (3).jpeg',
-    },
-    {
-      'title': 'مختبر الابتكارات التكنولوجية',
-      "description": "مشروع لتطوير حلول تكنولوجيا المعلومات.\nنركز على تقديم خدمات متكاملة للشركات.",
-      'image': 'assets/images/p1 (2).jpeg',
-    },
-  ];
+
+
 
   final List<String> cities = ['نابلس', 'جنين', 'قلقيلية', 'رام الله', 'طولكرم'];
   final List<String> fields = [
@@ -100,7 +120,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF0A1D47),
       ),
-      drawer: DrawerUsers(scaffoldKey: _scaffoldKey),
+      drawer:widget.isInvestor?Drawerinvestor(scaffoldKey: _scaffoldKey): DrawerUsers(scaffoldKey: _scaffoldKey),
       body: Row(
         children: [
           Expanded(
@@ -108,9 +128,10 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
               child: Column(
                 children: [
                   HeaderScreen(),
-                  NavigationBarUsers(
-                    scaffoldKey: _scaffoldKey,
-                    onSelectContact: (value) {},
+                  widget.isInvestor?NavigationBarinvestor(scaffoldKey: _scaffoldKey, onSelectContact: (String ) {  },):NavigationBarUsers(
+                    onSelectContact: (value) {
+                      _scaffoldKey.currentState!.openDrawer();
+                    },
                   ),
                   const SizedBox(height: 20),
                   _buildSearchButton(),
@@ -138,7 +159,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       children: [
         Wrap(
           alignment: WrapAlignment.center,
-          children: projects.map((project) => _buildProjectCard(project)).toList(),
+          children: filteredProjects.map((project) => _buildProjectCard(project)).toList(),
         ),
       ],
     );
@@ -264,6 +285,8 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                           setState(() {
                             _selectedCity = city; // قم بتحديث المدينة المحددة
                           });
+                          getFilteredProjects();
+
                         },
                       ),
                     ],
@@ -290,6 +313,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                         onChanged: (value) {
                           setState(() {
                             _selectedField = field; // قم بتحديث المجال المحدد
+                            getFilteredProjects();
                           });
                         },
                       ),
@@ -316,7 +340,8 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                         activeColor: Colors.orangeAccent, // اللون البرتقالي عند التحديد
                         onChanged: (value) {
                           setState(() {
-                            _selectedStage = stage; // قم بتحديث المرحلة المحددة
+                            _selectedStage = stage;
+                            getFilteredProjects();// قم بتحديث المرحلة المحددة
                           });
                         },
                       ),
@@ -331,7 +356,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
     );
   }
 
-  Widget _buildProjectCard(Map<String, String> project) {
+  Widget _buildProjectCard(dynamic project) {
     return Container(
       width: 300,
       height: 400,
@@ -352,7 +377,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-            child: Image.asset(
+            child: Image.network(
               project['image']!,
               width: double.infinity,
               height: 200,
@@ -380,12 +405,21 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ProjectInformationScreen()),
-              );
+              if(widget.isInvestor){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ProjectInformationScreen.toInvestor(projectId: project['_id'],)),
+                );
+              }
+              else{
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ProjectInformationScreen(projectId: project['_id'],)),
+                );
+              }
+
             },
-            child: Text('المزيد من المعلومات'),
+            child: Text(widget.isInvestor?'تواصل الان':'المزيد من المعلومات'),
             style: ElevatedButton.styleFrom(
               minimumSize: const Size(100, 36),
             ),

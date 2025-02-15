@@ -34,33 +34,33 @@ class _GrantsPageState extends State<GrantsPage> {
     }
     String tokenWithPrefix = 'token__$savedToken';
     try{
-    final response = await http.get(
-      Uri.parse('http://$ip:4000/api/v1/grant/all'),
-      headers: {
-        'Content-Type': 'application/json',
-        'token': tokenWithPrefix,},
-    );
-
-    if (response.statusCode == 200) {
-      Map<String, dynamic> jsonResponse = json.decode(response.body);
-      setState(() {
-        grants = (jsonResponse['getAll'] as List).map((grant) {
-          return {
-            'nameOfCompany': grant['nameOfCompany'],  // تعديل هنا
-            'nameOfGrant': grant['nameOfGrant'],  // تعديل هنا
-            'description': grant['description'],  // تعديل هنا
-            'DateOfEndoFGrant': grant['DateOfEndoFGrant'],  // تعديل هنا
-
-          };
-        }).toList();
-      });
-      print("$grants");
-    } else {
-      // يمكنك إضافة معالجة الأخطاء هنا
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('فشل في جلب البيانات')),
+      final response = await http.get(
+        Uri.parse('http://$ip:4000/api/v1/grant/all'),
+        headers: {
+          'Content-Type': 'application/json',
+          'token': tokenWithPrefix,},
       );
-    }} catch (error) {
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> jsonResponse = json.decode(response.body);
+        setState(() {
+          grants = (jsonResponse['getAll'] as List).map((grant) {
+            return {
+              'nameOfCompany': grant['nameOfCompany'],  // تعديل هنا
+              'nameOfGrant': grant['nameOfGrant'],  // تعديل هنا
+              'description': grant['description'],  // تعديل هنا
+              'DateOfEndoFGrant': grant['DateOfEndoFGrant'],  // تعديل هنا
+
+            };
+          }).toList();
+        });
+        print("$grants");
+      } else {
+        // يمكنك إضافة معالجة الأخطاء هنا
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('فشل في جلب البيانات')),
+        );
+      }} catch (error) {
       print('Error: $error');
       //return {'success': false, 'message': "An error occurred"};
     }
@@ -79,9 +79,8 @@ class _GrantsPageState extends State<GrantsPage> {
           children: [
             HeaderScreen(), // استدعاء الهيدر
             NavigationBarUsers(
-              scaffoldKey: _scaffoldKey,
               onSelectContact: (value) {
-                // منطق لتحديد جهة الاتصال
+                _scaffoldKey.currentState!.openDrawer();
               },
             ),
             const SizedBox(height: 40),
@@ -116,18 +115,6 @@ class _GrantsPageState extends State<GrantsPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          SizedBox(
-            width: 150, // تحديد عرض الزر
-            child: ElevatedButton(
-              onPressed: () {
-                // هنا يمكنك إضافة الوظيفة لزر "تقديم الآن"
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('تم الضغط على تقديم الآن')),
-                );
-              },
-              child: Text('تقديم الآن'),
-            ),
-          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start, // تعديل إلى start
             children: [
@@ -151,6 +138,18 @@ class _GrantsPageState extends State<GrantsPage> {
                 style: TextStyle(fontSize: 12),
               ),
             ],
+          ),
+          SizedBox(
+            width: 150, // تحديد عرض الزر
+            child: ElevatedButton(
+              onPressed: () {
+                // هنا يمكنك إضافة الوظيفة لزر "تقديم الآن"
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('تم الضغط على تقديم الآن')),
+                );
+              },
+              child: Text('تقديم الآن'),
+            ),
           ),
         ],
       ),
