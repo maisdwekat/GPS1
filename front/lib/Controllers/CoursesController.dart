@@ -6,24 +6,63 @@ import '../constants.dart';
 
 class CoursesController {
   final String baseUrl = "http://$ip:4000/api/v1/EducationalCourse";
-  TokenController token =TokenController();
+  TokenController token = TokenController();
 
-
-  //updateCourse
-  Future<void> updateCourse(String id, Map<String, String> updatedCourse) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/update/$id'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(updatedCourse),
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('فشل في تحديث الدورة');
+  Future<Map<String, dynamic>?> updateCourse({
+    required String corseid,
+    required String description,
+    required String nameOfCompany,
+    required String nameOfEducationalCourse,
+    required String DateOfCourse,
+  }) async {
+    final savedToken = await token.getToken();
+    if (savedToken == null || savedToken.isEmpty) {
+      print("Error: Token is null or empty");
+      return {'success': false, 'message': "Authentication token is missing"};
     }
+    String tokenWithPrefix = 'token__$savedToken';
+    print("token: ${tokenWithPrefix}");
+
+    try {
+      final response = await http.patch(
+        Uri.parse('$baseUrl/update/$corseid'),
+        headers: {
+          'Content-Type': 'application/json',
+          'token': tokenWithPrefix,
+        },
+        body: json.encode({
+          'nameOfCompany': nameOfCompany,
+          'description': description,
+          'nameOfEducationalCourse': nameOfEducationalCourse,
+          'DateOfCourse': DateOfCourse,
+        }),
+      );
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+      final responseData = json.decode(response.body);
+
+      if (response.statusCode == 200 && responseData.containsKey('saveIdea')) {
+        return {'success': true, 'message': "Idea added successfully!"};
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? "Failed to add idea"
+        };
+      }
+    } catch (error) {
+      print('Error: $error');
+      return {'success': false, 'message': "An error occurred"};
+    }
+    return null;
   }
+
   //addCourse
-  Future<Map<String,dynamic>?> addCourse(String nameOfCompany, String nameOfEducationalCourse, String description  , String DateOfCourse) async {
-    final savedToken =await token.getToken();
+  Future<Map<String, dynamic>?> addCourse(
+      String nameOfCompany,
+      String nameOfEducationalCourse,
+      String description,
+      String DateOfCourse) async {
+    final savedToken = await token.getToken();
     if (savedToken == null || savedToken.isEmpty) {
       print("Error: Token is null or empty");
       return {'success': false, 'message': "Authentication token is missing"};
@@ -34,8 +73,10 @@ class CoursesController {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/add'),
-        headers: {'Content-Type': 'application/json',
-          'token': tokenWithPrefix,},
+        headers: {
+          'Content-Type': 'application/json',
+          'token': tokenWithPrefix,
+        },
         body: json.encode({
           'nameOfCompany': nameOfCompany,
           'nameOfEducationalCourse': nameOfEducationalCourse,
@@ -50,7 +91,10 @@ class CoursesController {
       if (response.statusCode == 201 && responseData.containsKey('saveIdea')) {
         return {'success': true, 'message': "Courses added successfully!"};
       } else {
-        return {'success': false, 'message': responseData['message'] ?? "Failed to add idea"};
+        return {
+          'success': false,
+          'message': responseData['message'] ?? "Failed to add idea"
+        };
       }
     } catch (error) {
       print('Error: $error');
@@ -59,15 +103,14 @@ class CoursesController {
     return null;
   }
 
-  Future<List< dynamic>> getAllCourses() async {
+  Future<List<dynamic>> getAllCourses() async {
     final savedToken = await token.getToken(); // تأكد من وجود دالة _getToken
     if (savedToken == null || savedToken.isEmpty) {
       print("Error: Token is null or empty");
       return [];
     }
     try {
-
-      final response = await http.get(Uri.parse('$baseUrl/all'),headers: {
+      final response = await http.get(Uri.parse('$baseUrl/all'), headers: {
         'Content-Type': 'application/json',
         'token': 'token__$savedToken',
       });
@@ -75,9 +118,8 @@ class CoursesController {
       print(response.statusCode);
       if (response.statusCode == 200) {
         final responesData = json.decode(response.body);
-        List< dynamic> ideas = (responesData['findAll'] as List);
+        List<dynamic> ideas = (responesData['findAll'] as List);
         return ideas;
-
       } else {
         print('Failed to get all Courses: ${response.statusCode}');
       }
@@ -87,14 +129,8 @@ class CoursesController {
     return [];
   }
 
-
-
-
-
-
-  //deleteCourse
-  Future<bool> deleteCourse(String grantid) async {
-    final savedToken =await token.getToken();
+  Future<bool> deleteCourse(String courseid) async {
+    final savedToken = await token.getToken();
     if (savedToken == null || savedToken.isEmpty) {
       print("Error: Token is null or empty");
       return true;
@@ -103,20 +139,21 @@ class CoursesController {
 
     try {
       final response = await http.delete(
-        Uri.parse('$baseUrl/delete/$grantid'),
-        headers: {'Content-Type': 'application/json',
-          'token': tokenWithPrefix,},
+        Uri.parse('$baseUrl/delete/$courseid'),
+        headers: {
+          'Content-Type': 'application/json',
+          'token': tokenWithPrefix,
+        },
       );
 
       if (response.statusCode == 200) {
         return false;
       } else {
-        print('Failed to delete grant: ${response.statusCode}');
+        print('Failed to delete Course: ${response.statusCode}');
       }
     } catch (error) {
       print('Error: $error');
     }
     return true; // في حالة الفشل
   }
-
 }

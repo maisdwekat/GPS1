@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../Controllers/ProjectController.dart';
-import '../../Controllers/token_controller.dart';
 import '../Welcome/welcome_screen.dart';
 import 'ActiveUsersTable.dart';
 import 'Courses.dart';
@@ -19,24 +17,16 @@ class ProjectsPage extends StatefulWidget {
 }
 
 class _ProjectsPageState extends State<ProjectsPage> {
-  ProjectController projectController = ProjectController();
-   List<dynamic> projects = [];
-
-
-
-  getProjects() async {
-    await projectController.getAllProjects().then((value) => projects.addAll(value));
-    setState(() {
-
-    });
-  }
-  @override
-  void initState() {
-    print('must be working ');
-    getProjects();
-    super.initState();
-  }
-
+  // قائمة المشاريع بدون استخدام فئة Project
+  List<Map<String, String>> projects = [
+    {
+      'name': 'مشروع 1',
+      'owner': 'أحمد محمد',
+      'email': 'ahmed@example.com',
+      'creationDate': '01/01/2023'
+    },
+    // يمكنك إضافة المزيد من المشاريع هنا
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -82,22 +72,13 @@ class _ProjectsPageState extends State<ProjectsPage> {
         style: TextStyle(color: Colors.white54),
       ),
       onTap: () {
-        if (page is WelcomeScreen) {
-          TokenController tokenController=TokenController();
-          tokenController.logout();
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => page),(route) => false,);
-        }
-        else{
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => page),
-          );
-        }},
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => page),
+        );
+      },
     );
   }
-
 
   Widget _buildMainContent(BuildContext context) {
     return Column(
@@ -182,10 +163,10 @@ class _ProjectsPageState extends State<ProjectsPage> {
         ],
         rows: projects.map((project) {
           return DataRow(cells: [
-            DataCell(Text(project['title']!, style: TextStyle(color: Colors.white))),
             DataCell(Text(project['name']!, style: TextStyle(color: Colors.white))),
+            DataCell(Text(project['owner']!, style: TextStyle(color: Colors.white))),
             DataCell(Text(project['email']!, style: TextStyle(color: Colors.white))),
-            DataCell(Text(project['date']!, style: TextStyle(color: Colors.white))),
+            DataCell(Text(project['creationDate']!, style: TextStyle(color: Colors.white))),
             DataCell(Row(
               children: [
                 IconButton(
@@ -203,21 +184,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                     // الانتقال إلى صفحة تفاصيل المشروع
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ProjectDetailsPage(
-                        projectId: project['id'],
-                        projectName: project['title'],
-                        description: project['description'],
-                        projectImageUrl: project['image'],
-                        city: project['location'],
-                        creationDate: project['date'],
-                        email: project['email'],
-                        website: project['website'],
-                        projectField: project['category'],
-                        summary: project['summary'],
-                        projectStatus: project['isPublic'],
-                        currentPhase: project['current_stage'],
-
-                      )),
+                      MaterialPageRoute(builder: (context) => ProjectDetailsPage()),
                     );
                   },
                 ),

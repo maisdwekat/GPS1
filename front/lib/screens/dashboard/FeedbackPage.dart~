@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../Controllers/feedbackController.dart';
+import '../../Controllers/token_controller.dart';
 import '../ContactUs/Chat.dart';
 import '../Welcome/welcome_screen.dart';
 import 'ActiveUsersTable.dart';
@@ -21,7 +22,7 @@ class FeedbackPage extends StatefulWidget {
 
 class _FeedbackPageState extends State<FeedbackPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  List<dynamic>? feedbackList = []; // Change the type here
+  List<Map<String, String>> feedbackList = []; // Change the type here
   final FeedbackController feedbackController = FeedbackController();
 
   @override
@@ -32,8 +33,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
   Future<void> getAllFeedback() async {
     // Make sure the method returns List<Map<String, String>>
-    feedbackList = await feedbackController.getAllFeedbackForAdmin();
-    print(feedbackList);
+    feedbackList = await feedbackController.getFeedBack() as List<Map<String, String>>;
     setState(() {});
   }
 
@@ -44,7 +44,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
       body: Row(
         children: [
           _buildSidebar(context),
-          Expanded(child: _buildMainContent(context, feedbackList)),
+          Expanded(child: _buildMainContent(context)),
         ],
       ),
     );
@@ -67,7 +67,6 @@ class _FeedbackPageState extends State<FeedbackPage> {
           _buildMenuItem(context, "المنح", Grantpage()),
           _buildMenuItem(context, "الإشعارات", Notifications()),
           _buildMenuItem(context, "الرسائل", ChatScreen()),
-          _buildMenuItem(context, "تسجيل خروج", WelcomeScreen()),
         ],
       ),
     );
@@ -75,25 +74,35 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
   Widget _buildMenuItem(BuildContext context, String title, Widget page) {
     return ListTile(
-      title: Text(title, style: const TextStyle(color: Colors.white54)),
+      title: Text(
+        title,
+        style: TextStyle(color: Colors.white54),
+      ),
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => page));
-      },
+        if (page is WelcomeScreen) {
+          TokenController tokenController=TokenController();
+          tokenController.logout();
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => page),(route) => false,);
+        }
+        else{
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => page),
+          );
+        }},
     );
   }
 
-  Widget _buildMainContent(BuildContext context, feedbackList) {
-    return feedbackList == null
-        ? Center(child: CircularProgressIndicator())
-        : Center(
+
+  Widget _buildMainContent(BuildContext context) {
+    return Center(
       child: Column(
         children: [
           _buildHeader(),
           _buildTitle(),
-          Expanded(
-              child: feedbackList == null
-                  ? Center(child: CircularProgressIndicator())
-                  : FeedbackTable(feedbackList: feedbackList)),
+          Expanded(child: FeedbackTable(feedbackList: feedbackList)),
         ],
       ),
     );
@@ -105,8 +114,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
       alignment: Alignment.center,
       child: const Text(
         "الفيدباك",
-        style: TextStyle(
-            color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+        style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -140,8 +148,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
             borderRadius: const BorderRadius.all(Radius.circular(10)),
           ),
           suffixIcon: Container(
-            decoration: BoxDecoration(
-                color: Colors.green, borderRadius: BorderRadius.circular(10)),
+            decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(10)),
             child: IconButton(
               icon: const Icon(Icons.search, color: Colors.white54),
               onPressed: () {},
@@ -153,17 +160,10 @@ class _FeedbackPageState extends State<FeedbackPage> {
   }
 }
 
-class FeedbackTable extends StatefulWidget {
-  List<dynamic>? feedbackList;
+class FeedbackTable extends StatelessWidget {
+  final List<Map<String, String>> feedbackList;
 
-  FeedbackTable({Key? key, required this.feedbackList}) : super(key: key);
-
-  @override
-  State<FeedbackTable> createState() => _FeedbackTableState();
-}
-
-class _FeedbackTableState extends State<FeedbackTable> {
-  FeedbackController feedbackController = FeedbackController();
+  const FeedbackTable({Key? key, required this.feedbackList}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -174,87 +174,26 @@ class _FeedbackTableState extends State<FeedbackTable> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Container(
-            decoration: BoxDecoration(
-                color: const Color(0xFF4A4A4A),
-                borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(color: const Color(0xFF4A4A4A), borderRadius: BorderRadius.circular(8)),
             child: DataTable(
               columnSpacing: 16,
               horizontalMargin: 10,
               dataRowHeight: 48,
               columns: const [
-                DataColumn(
-                    label: Text("اسم المستخدم",
-                        style: TextStyle(color: Colors.white))),
-                DataColumn(
-                    label: Text("البريد الإلكتروني",
-                        style: TextStyle(color: Colors.white))),
-                DataColumn(
-                    label: Text("الفيدباك",
-                        style: TextStyle(color: Colors.white))),
-                DataColumn(
-                    label: Text("الإجراءات",
-                        style: TextStyle(color: Colors.white))),
+                DataColumn(label: Text("اسم المستخدم", style: TextStyle(color: Colors.white))),
+                DataColumn(label: Text("البريد الإلكتروني", style: TextStyle(color: Colors.white))),
+                DataColumn(label: Text("الفيدباك", style: TextStyle(color: Colors.white))),
+                DataColumn(label: Text("الإجراءات", style: TextStyle(color: Colors.white))),
               ],
-              rows: widget.feedbackList!.map((feedback) {
+              rows: feedbackList.map((feedback) {
                 return DataRow(cells: [
-                  DataCell(Text(feedback["userName"]!,
-                      style: const TextStyle(color: Colors.white))),
-                  DataCell(Text(feedback["email"]!,
-                      style: const TextStyle(color: Colors.white))),
-                  DataCell(
-                      // Text(feedback["description"]!,
-                      // style: const TextStyle(color: Colors.white))
-                    IconButton(
-                      icon:Icon( Icons.preview_outlined,),
-                      onPressed: () {
-                        showGeneralDialog(context: context, pageBuilder: (context, animation, secondaryAnimation) {
-
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 300.0,vertical: 200.0),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.all(Radius.circular(10)),
-                                child: Scaffold(
-                                  body: SizedBox(
-                                      height: 200,
-                                      width: double.infinity,
-                                      child: Center(child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                        children: [
-                                          Text(feedback["description"]!),
-                                          SizedBox(
-                                              width: 80,
-                                              child: ElevatedButton(onPressed: (){
-                                                Navigator.of(context).pop();
-                                              }, child: Text('اغلاق')))
-                                        ],
-                                      ))),
-                                ),
-                              ),
-                            );
-
-
-                        },);
-
-
-                      },
-                    )
-                  ),
+                  DataCell(Text(feedback["username"]!, style: const TextStyle(color: Colors.white))),
+                  DataCell(Text(feedback["email"]!, style: const TextStyle(color: Colors.white))),
+                  DataCell(Text(feedback["notes"]!, style: const TextStyle(color: Colors.white))),
                   DataCell(
                     IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () async {
-                        String feedbackId = feedback["_id"]!;
-                        feedbackController.deleteFeedback(feedbackId);
-                        if (widget.feedbackList != null) {
-                          widget.feedbackList!.clear();
-                          widget.feedbackList =
-                          await feedbackController.getAllFeedbackForAdmin();
-                        } else {
-                          widget.feedbackList =
-                          await feedbackController.getAllFeedbackForAdmin();
-                        }
-                        setState(() {});
-
+                      onPressed: () {
                         // Handle delete action here
                       },
                     ),
@@ -276,9 +215,7 @@ class ProfileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-          color: const Color(0xFF4A4A4A),
-          borderRadius: BorderRadius.circular(10)),
+      decoration: BoxDecoration(color: const Color(0xFF4A4A4A), borderRadius: BorderRadius.circular(10)),
       child: Row(
         children: [
           const CircleAvatar(

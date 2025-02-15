@@ -22,7 +22,7 @@ class _ChatForInquiriesScreenState extends State<ChatForInquiriesScreen> {
   void _sendMessage() {
     if (_messageController.text.isNotEmpty) {
       final String messageText = _messageController.text;
-      usersChatController.getMessageUser(widget.id, messageText);
+      usersChatController.sendMessageUser(widget.id, messageText);
 
       // إضافة الرسالة إلى واجهة المستخدم
       setState(() {

@@ -287,6 +287,8 @@ class ProjectController extends GetxController {
     }
   }
 
+
+
   Future<dynamic> updateproject(String projectId, String title, String description, String current_stage, bool isPublic, String location, String category, String website, String email, String summary, String date) async {
     print("getAllForUser() called");
     final savedToken =
@@ -748,12 +750,11 @@ class ProjectController extends GetxController {
 
     // Send the request
     var response = await request.send();
-    var responseBody = await response.stream.bytesToString();
 
     // Check the response status
     if (response.statusCode < 299) {
       print('Project added successfully');
-      return {'success': true, 'data':jsonDecode(responseBody)};
+      return {'success': true, 'data':jsonDecode(response.body)};
     } else {
       print('Failed to add project. Status code: ${response.statusCode}');
       print(response.reasonPhrase);
@@ -763,89 +764,4 @@ class ProjectController extends GetxController {
       };
     }
   }
-
-  Future<dynamic> getSpecificProject(String projectId) async {
-    print("getSpecificProject() called");
-    final savedToken =
-    await tokenController.getToken(); // تأكد من وجود دالة _getToken
-    if (savedToken == null || savedToken.isEmpty) {
-      print("Error: Token is null or empty");
-      return null;
-    }
-    Map<String, dynamic> decodedToken = JwtDecoder.decode(savedToken);
-    print("Decoded Token: $decodedToken");
-    String tokenWithPrefix = 'token__$savedToken';
-    print("Token: $tokenWithPrefix");
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/get/$projectId'),
-        headers: {
-          'Content-Type': 'application/json',
-          'token': tokenWithPrefix,
-        },
-      );
-      print("Sent Request");
-      print('Response Status Code: ${response.statusCode}');
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-
-        dynamic project =responseData['getProject'];
-
-        print(project);
-        return project; // Assuming the response contains a key 'ideas'
-
-      } else {
-        print(
-            'Failed to fetch ideas: ${response.statusCode}'); // طباعة رسالة عند الفشل
-        return null; // أو معالجة الخطأ حسب الحاجة
-      }
-    } catch (error) {
-      print('Error: $error'); // طباعة أي خطأ قد يحدث
-      return null; // أو معالجة الخطأ حسب الحاجة
-    }
-  }
-
-
-  Future<dynamic> getallProjectForAdmin() async {
-    print("getallProjectForAdmin() called");
-    final savedToken =
-    await tokenController.getToken(); // تأكد من وجود دالة _getToken
-    if (savedToken == null || savedToken.isEmpty) {
-      print("Error: Token is null or empty");
-      return null;
-    }
-    Map<String, dynamic> decodedToken = JwtDecoder.decode(savedToken);
-    print("Decoded Token: $decodedToken");
-    String tokenWithPrefix = 'token__$savedToken';
-    print("Token: $tokenWithPrefix");
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/allForAdmin'),
-        headers: {
-          'Content-Type': 'application/json',
-          'token': tokenWithPrefix,
-        },
-      );
-      print("Sent Request");
-      print('Response Status Code: ${response.statusCode}');
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-
-        dynamic project =responseData['getProject'];
-
-        print(project);
-        return project; // Assuming the response contains a key 'ideas'
-
-      } else {
-        print(
-            'Failed to fetch ideas: ${response.statusCode}'); // طباعة رسالة عند الفشل
-        return null; // أو معالجة الخطأ حسب الحاجة
-      }
-    } catch (error) {
-      print('Error: $error'); // طباعة أي خطأ قد يحدث
-      return null; // أو معالجة الخطأ حسب الحاجة
-    }
-  }
-
-
 }

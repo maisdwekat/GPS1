@@ -18,23 +18,30 @@ class _CoursesScreenState extends State<CoursesScreen> {
   final TextEditingController _searchController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Map<String, String>> courses = [];
-  final CoursesController _coursesController = CoursesController(); // إنشاء مثيل من CoursesController
+
+  List<dynamic> ideas = [];
+  CoursesController idea = CoursesController();
+
+  Future<void> getAllCourse() async {
+    print("getAllCourses called");
+    ideas = await idea.getAllCourses();
+    print(ideas);
+    setState(() {
+      courses = ideas.map((course) {
+        return {
+          'nameOfCompany': course['nameOfCompany']?.toString() ?? '',
+          'nameOfEducationalCourse': course['nameOfEducationalCourse']?.toString() ?? '',
+          'description': course['description']?.toString() ?? '',
+          'DateOfCourse': course['DateOfCourse']?.toString() ?? '',
+        };
+      }).toList();
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    fetchCourses(); // جلب الدورات عند بدء الصفحة
-  }
-
-  Future<void> fetchCourses() async {
-    try {
-      final fetchedCourses = await _coursesController.fetchCourses(); // استدعاء الدالة من CoursesController
-      setState(() {
-        courses = fetchedCourses;
-      });
-    } catch (e) {
-      print('Error: $e');
-    }
+    getAllCourse();
   }
 
   @override

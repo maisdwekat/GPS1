@@ -166,13 +166,11 @@ class _IdeasPageState extends State<IdeasPage> {
     return SingleChildScrollView(
       child: DataTable(
         columns: [
-          DataColumn(label: Text('اسم صاحب الفكرة', style: TextStyle(color: Colors.white))),
           DataColumn(label: Text('البريد الإلكتروني', style: TextStyle(color: Colors.white))),
           DataColumn(label: Text('الإجراءات', style: TextStyle(color: Colors.white))),
         ],
         rows: ideas!.map((idea) {
           return DataRow(cells: [
-            DataCell(Text(idea['_id']!, style: TextStyle(color: Colors.white))),
             DataCell(Text(idea['emailContact']!, style: TextStyle(color: Colors.white))),
             DataCell(Row(
               children: [

@@ -34,33 +34,20 @@ class _GrantpageState extends State<Grantpage> {
 
 
   void addgrant() async {
-    String nameCompany = nameOfCompanyController.text;
-    String nameGrant=nameOfGrantController.text;
-    String Description=descriptionController.text;
-    String Date=DateOfEndoFGrant.text;
     var result = await grantcontroller.addGrant(
-      nameCompany,
-      nameGrant,
-      Description,
-      Date
+      nameOfCompanyController.text,
+      nameOfGrantController.text,
+      descriptionController.text,
+      DateOfEndoFGrant.text,
     );
     nameOfCompanyController.text='';
     nameOfGrantController.text='';
     descriptionController.text='';
     DateOfEndoFGrant.text='';
-    if (result != null ) {
+    if (result != null && result['success']) {
       print("Idea added successfully!");
 
       _showSuccessDialog();
-      grants.add({
-        'nameOfCompany': nameCompany,
-        'nameOfGrant': nameGrant,
-        'description': Description,
-        'DateOfEndoFGrant': Date
-      });
-      setState(() {
-        
-      });
     } else {
       print("Failed to add grant: ${result?['message']}");
       Fluttertoast.showToast(
@@ -322,7 +309,7 @@ class _GrantpageState extends State<Grantpage> {
                     TextFormField(
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'يرجى إدخال اسم الشركة';
+                          return 'Please enter a name';
                         }
                         return null;
                       },
@@ -339,7 +326,7 @@ class _GrantpageState extends State<Grantpage> {
                     TextFormField(
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'يرجى إدخال اسم المنحة';
+                          return 'Please enter a name';
                         }
                         return null;
                       },
@@ -356,7 +343,7 @@ class _GrantpageState extends State<Grantpage> {
                     TextFormField(
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'يرجى إدخال الوصف';
+                          return 'Please enter a name';
                         }
                         return null;
                       },
@@ -373,7 +360,7 @@ class _GrantpageState extends State<Grantpage> {
                     TextFormField(
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'يرجى إدخال تاريخ بدء التقديم';
+                          return 'Please enter a name';
                         }
                         return null;
                       },

@@ -34,33 +34,33 @@ class _GrantsPageState extends State<GrantsPage> {
     }
     String tokenWithPrefix = 'token__$savedToken';
     try{
-    final response = await http.get(
-      Uri.parse('http://$ip:4000/api/v1/grant/all'),
-      headers: {
-        'Content-Type': 'application/json',
-        'token': tokenWithPrefix,},
-    );
-
-    if (response.statusCode == 200) {
-      Map<String, dynamic> jsonResponse = json.decode(response.body);
-      setState(() {
-        grants = (jsonResponse['getAll'] as List).map((grant) {
-          return {
-            'nameOfCompany': grant['nameOfCompany'],  // تعديل هنا
-            'nameOfGrant': grant['nameOfGrant'],  // تعديل هنا
-            'description': grant['nameOfCompany'],  // تعديل هنا
-            'DateOfEndoFGrant': grant['nameOfCompany'],  // تعديل هنا
-
-          };
-        }).toList();
-      });
-      print("$grants");
-    } else {
-      // يمكنك إضافة معالجة الأخطاء هنا
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('فشل في جلب البيانات')),
+      final response = await http.get(
+        Uri.parse('http://$ip:4000/api/v1/grant/all'),
+        headers: {
+          'Content-Type': 'application/json',
+          'token': tokenWithPrefix,},
       );
-    }} catch (error) {
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> jsonResponse = json.decode(response.body);
+        setState(() {
+          grants = (jsonResponse['getAll'] as List).map((grant) {
+            return {
+              'nameOfCompany': grant['nameOfCompany'],  // تعديل هنا
+              'nameOfGrant': grant['nameOfGrant'],  // تعديل هنا
+              'description': grant['description'],  // تعديل هنا
+              'DateOfEndoFGrant': grant['DateOfEndoFGrant'],  // تعديل هنا
+
+            };
+          }).toList();
+        });
+        print("$grants");
+      } else {
+        // يمكنك إضافة معالجة الأخطاء هنا
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('فشل في جلب البيانات')),
+        );
+      }} catch (error) {
       print('Error: $error');
       //return {'success': false, 'message': "An error occurred"};
     }
@@ -132,13 +132,23 @@ class _GrantsPageState extends State<GrantsPage> {
             crossAxisAlignment: CrossAxisAlignment.start, // تعديل إلى start
             children: [
               Text(
-                grant['institution'], // استخدام نوع dynamic
+                grant['nameOfCompany'], // استخدام نوع dynamic
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 4),
               Text(
-                grant['title'], // استخدام نوع dynamic
+                grant['nameOfGrant'], // استخدام نوع dynamic
                 style: TextStyle(fontSize: 16),
+              ),
+              SizedBox(height: 4),
+              Text(
+                grant['description'], // استخدام نوع dynamic
+                style: TextStyle(fontSize: 14),
+              ),
+              SizedBox(height: 4),
+              Text(
+                grant['DateOfEndoFGrant'], // استخدام نوع dynamic
+                style: TextStyle(fontSize: 12),
               ),
             ],
           ),

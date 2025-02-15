@@ -34,9 +34,7 @@ class Grantcontroller {
 
       if (response.statusCode == 200 && responseData.containsKey('saveGrant')) {
         return {'success': true, 'message': "Grant added successfully!"};
-      } else {
-        return {'success': false, 'message': responseData['message'] ?? "Grant added successfully"};
-      }
+      } 
     } catch (error) {
       print('Error: $error');
       return {'success': false, 'message': "An error occurred"};

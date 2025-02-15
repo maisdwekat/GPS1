@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ggg_hhh/Controllers/date_controller.dart';
 import 'package:ggg_hhh/Widget/bmc_widget.dart';
 
 class ProjectDetailsPage extends StatelessWidget {
@@ -50,7 +51,7 @@ class ProjectDetailsPage extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               'اسم المشروع: $projectName',
@@ -64,11 +65,9 @@ class ProjectDetailsPage extends StatelessWidget {
               textAlign: TextAlign.right,
             ),
             SizedBox(height: 16.0),
-            Text(
-              'تاريخ إنشاء المشروع: $creationDate',
-              style: TextStyle(color: Colors.white, fontSize: 16),
-              textAlign: TextAlign.right,
-            ),
+            Text('تاريخ إنشاء المشروع:${ConvertDateAndFormate(creationDate)}',
+              style: TextStyle(color: Colors.white, fontSize: 16), textAlign: TextAlign.right,),
+
             SizedBox(height: 16.0),
             Text(
               'المدينة: $city',
@@ -83,7 +82,8 @@ class ProjectDetailsPage extends StatelessWidget {
             ),
             SizedBox(height: 16.0),
             Text(
-              'حالة المشروع: $projectStatus',
+              'حالة المشروع: ${ projectStatus?'عام':'خاص'}',
+
               style: TextStyle(color: Colors.white, fontSize: 16),
               textAlign: TextAlign.right,
             ),
@@ -106,27 +106,39 @@ class ProjectDetailsPage extends StatelessWidget {
               textAlign: TextAlign.right,
             ),
             SizedBox(height: 16.0),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Image.network(
-                  projectImageUrl,
-                  height: 200,
-                  width: 400,
-                  fit: BoxFit.cover,
-                ),
-                SizedBox(height: 4.0), // مساحة بين الصورة والجملة
-                Text(
-                  'صورة المشروع',
-                  style: TextStyle(color: Colors.white, fontSize: 14),
-                  textAlign: TextAlign.right,
-                ),
-              ],
+            Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'صورة المشروع',
+                    style: TextStyle(color: Colors.white, fontSize: 14),
+                    textAlign: TextAlign.right,
+                  ),
+                  SizedBox(height: 10.0), // مساحة بين الصورة والجملة
+
+                  Image.network(
+                    projectImageUrl,
+                    height: 200,
+                    width: 400,
+                    fit: BoxFit.cover,
+                  ),
+                  SizedBox(height: 4.0), // مساحة بين الصورة والجملة
+
+                ],
+              ),
             ),
             SizedBox(height: 16.0),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
+                Text(
+                  'صورة نموذج العمل',
+                  style: TextStyle(color: Colors.white, fontSize: 14),
+                  textAlign: TextAlign.right,
+                ),
+                SizedBox(height: 4.0), // مساحة بين الصورة والجملة
+
                 BmcWidget.pre(id: projectId),
                 // Image.network(
                 //   businessModelImageUrl,
@@ -134,12 +146,7 @@ class ProjectDetailsPage extends StatelessWidget {
                 //   width: double.infinity,
                 //   fit: BoxFit.cover,
                 // ),
-                SizedBox(height: 4.0), // مساحة بين الصورة والجملة
-                Text(
-                  'صورة نموذج العمل',
-                  style: TextStyle(color: Colors.white, fontSize: 14),
-                  textAlign: TextAlign.right,
-                ),
+
               ],
             ),
             SizedBox(height: 16.0),
@@ -148,6 +155,8 @@ class ProjectDetailsPage extends StatelessWidget {
               style: TextStyle(color: Colors.white, fontSize: 16),
               textAlign: TextAlign.right,
             ),
+            SizedBox(height: 100),
+
           ],
         ),
       ),

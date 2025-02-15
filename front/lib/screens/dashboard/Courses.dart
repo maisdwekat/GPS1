@@ -1,19 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ggg_hhh/Controllers/date_controller.dart';
 import '../../Controllers/CoursesController.dart';
 import '../../Controllers/token_controller.dart';
-import '../ContactUs/Chat.dart';
-import '../Welcome/welcome_screen.dart';
-import '../users/GrantsPage/GrantsPage.dart';
-import 'ActiveUsersTable.dart';
-import 'Dashboard.dart';
-import 'FeedbackPage.dart';
-import 'Grants.dart';
-import 'IdeasPage.dart';
-import 'Notifications.dart';
-import 'ProjectsPage.dart';
-import 'UsersPage.dart';
-import 'chatscreen.dart';
+import '../../Widget/admin/sidebar.dart';
 
 class Courses extends StatefulWidget {
   @override
@@ -21,27 +11,28 @@ class Courses extends StatefulWidget {
 }
 
 class _CoursesState extends State<Courses> {
-  List<Map<String, dynamic>> courses = [];
+  CoursesController courseController = CoursesController();
+
+  List<dynamic> courses = [];
   final CoursesController _coursesController = CoursesController();
   final companyController = TextEditingController();
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
   final dateController = TextEditingController();
-
+  TokenController token =TokenController();
   @override
   void initState() {
     super.initState();
     fetchCourses(); // جلب الدورات عند بدء الشاشة
   }
-  List<dynamic> ideas = [];
 
   Future<void> fetchCourses() async {
     try {
-      ideas= await _coursesController.getAllCourses();
+        courses = await courseController.getAllCourses();
       setState(() {
-        courses = ideas.map((course) {
+        courses = courses.map((course) {
           return {
-            '_id': course['id']?.toString() ?? '',
+            '_id': course['_id']?.toString() ?? '',
             'nameOfCompany': course['nameOfCompany']?.toString() ?? '',
             'nameOfEducationalCourse': course['nameOfEducationalCourse']?.toString() ?? '',
             'description': course['description']?.toString() ?? '',
@@ -54,7 +45,9 @@ class _CoursesState extends State<Courses> {
     }
   }
 
+
   void _showAddCourseDialog(BuildContext context) {
+    String date;
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -75,7 +68,20 @@ class _CoursesState extends State<Courses> {
                   SizedBox(height: 10),
                   _buildMultilineTextField(descriptionController, "الوصف"),
                   SizedBox(height: 10),
-                  _buildTextField(dateController, "تاريخ الدورة"),
+                  _buildTextField(dateController, "تاريخ الدورة",readOnly: true, onTap: () async {
+                    DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2101),
+                    );
+                    if (pickedDate != null) {
+                      setState(() {
+                        date = pickedDate.toString();
+                        dateController.text = ConvertDateAndFormate(date);
+                      });
+                    }
+                  }),
                   SizedBox(height: 10),
                 ],
               ),
@@ -91,8 +97,39 @@ class _CoursesState extends State<Courses> {
             TextButton(
               child: Text("إضافة", style: TextStyle(color: Colors.white)),
               onPressed: () async {
-                addCourse();
+                date=DateTime.parse(dateController.text).toIso8601String();
+                var result = await courseController.addCourse(
+                  companyController.text,
+                  nameController.text,
+                  descriptionController.text,
+                  date,
+                );
                 Navigator.pop(context); // العودة للصفحة السابقة
+
+
+                if (result != null) {
+                  print("Courses added successfully!");
+                  _showSuccessDialog();
+                  courses.add({
+                    'nameOfCompany': companyController.text,
+                    'nameOfEducationalCourse': nameController.text,
+                    'description': descriptionController.text,
+                    'DateOfCourse': date,
+                  });
+
+                  setState(() {});
+                } else {
+                  print("Failed to add course: ${result?['message']}");
+                  Fluttertoast.showToast(
+                    msg: "Failed to add course: ${result?['message']}",
+                    toastLength: Toast.LENGTH_LONG,
+                    gravity: ToastGravity.BOTTOM,
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    fontSize: 16.0,
+                  );
+
+                }
 
               },
             ),
@@ -102,30 +139,7 @@ class _CoursesState extends State<Courses> {
     );
   }
 
-  void addCourse() async {
-    CoursesController courseController = CoursesController();
-    var result = await courseController.addCourse(
-      companyController.text,
-      nameController.text,
-      descriptionController.text,
-      dateController.text,
-    );
 
-    if (result != null && result['success']) {
-      print("Courses added successfully!");
-      _showSuccessDialog();
-    } else {
-      print("Failed to add course: ${result?['message']}");
-      Fluttertoast.showToast(
-        msg: "Failed to add course: ${result?['message']}",
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-    }
-  }
   void _showSuccessDialog() {
     showDialog(
       context: context,
@@ -145,8 +159,10 @@ class _CoursesState extends State<Courses> {
 
 
 
-  Widget _buildTextField(TextEditingController controller, String hint) {
+  Widget _buildTextField(TextEditingController controller, String hint,{bool readOnly = false,final onTap}) {
     return TextField(
+      readOnly: readOnly,
+      onTap: onTap,
       controller: controller,
       style: TextStyle(color: Colors.white),
       decoration: InputDecoration(
@@ -196,7 +212,7 @@ class _CoursesState extends State<Courses> {
             DataCell(Text(course['nameOfCompany']!, style: TextStyle(color: Colors.white))),
             DataCell(Text(course['nameOfEducationalCourse']!, style: TextStyle(color: Colors.white))),
             DataCell(Text(course['description']!, style: TextStyle(color: Colors.white))),
-            DataCell(Text(course['DateOfCourse']!, style: TextStyle(color: Colors.white))),
+            DataCell(Text(ConvertDateAndFormate(course['DateOfCourse']!), style: TextStyle(color: Colors.white))),
             DataCell(Row(
               children: [
                 IconButton(
@@ -207,8 +223,14 @@ class _CoursesState extends State<Courses> {
                 ),
                 IconButton(
                   icon: Icon(Icons.delete, color: Colors.red),
-                  onPressed: () async {
-                    await _deleteCourse(course['id']);
+                  onPressed: ()async {
+                   await courseController.deleteCourse( course["_id"]);
+                    courses.removeWhere((element) =>  element["_id"] == course["_id"]);
+                    setState(() {
+
+                    });
+
+
                   },
                 ),
               ],
@@ -229,54 +251,98 @@ class _CoursesState extends State<Courses> {
     }
   }
 
-  void _showEditCourseDialog(BuildContext context, Map<String, dynamic> course) {
-    // إضافة منطق تعديل الدورة هنا (مشابه للدالة _showAddCourseDialog)
-  }
+  void _showEditCourseDialog(BuildContext context, dynamic course) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        companyController.text = course['nameOfCompany'];
+        nameController.text = course['nameOfEducationalCourse'];
+        descriptionController.text = course['description'];
+        String date = course['DateOfCourse'];
+        dateController.text = ConvertDateAndFormate(date);
+        return AlertDialog(
+          title: Text("تعديل دورة", style: TextStyle(color: Colors.white)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          backgroundColor: Color(0xFF3A3A3A),
+          content: SingleChildScrollView(
+            child: Container(
+              width: 400,
+              child: Column(
+                children: [
+                  _buildTextField(companyController, "اسم الشركة"),
+                  SizedBox(height: 10),
+                  _buildTextField(nameController, "اسم الدورة"),
+                  SizedBox(height: 10),
+                  _buildMultilineTextField(descriptionController, "الوصف"),
+                  SizedBox(height: 10),
+                  _buildTextField(dateController, "تاريخ الدورة", readOnly: true,onTap: () async {
+                    DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2101),
+                    );
+                    if (pickedDate != null) {
+                      date=pickedDate.toString();
+                      String formattedDate = dateFormater(pickedDate);
+                      setState(() {
+                        dateController.text = formattedDate;
+                      });
+                    }
+                  }),
+                  SizedBox(height: 10),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: Text("إلغاء", style: TextStyle(color: Colors.white)),
+              onPressed: () {
+                companyController.clear();
+                nameController.clear();
+                descriptionController.clear();
+                dateController.clear();
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text("تعديل", style: TextStyle(color: Colors.white)),
+              onPressed: () async {
+                final res=await courseController.updateCourse(
+                  corseid:course["_id"],
+                  nameOfCompany: companyController.text,
+                  description: descriptionController.text,
+                  DateOfCourse: date,
+                  nameOfEducationalCourse: nameController.text,
+                                  );
+                companyController.clear();
+                nameController.clear();
+                descriptionController.clear();
+                dateController.clear();
+                Navigator.pop(context); // العودة للصفحة السابقة
+                  if(res!=null){
+                    _showSuccessDialog();
+                    courses.clear();
+                    fetchCourses();
+                    setState(() {
 
-  Widget _buildSidebar(BuildContext context) {
-    return Container(
-      width: 250,
-      color: Color(0xFF4A4A4A),
-      child: Column(
-        children: [
-          SizedBox(height: 70),
-          _buildMenuItem(context, "لوحة التحكم", DashboardPage()),
-          _buildMenuItem(context, "المستخدمون", UsersPage()),
-          _buildMenuItem(context, "المشاريع", ProjectsPage()),
-          _buildMenuItem(context, "الأفكار", IdeasPage()),
-          _buildMenuItem(context, "الدورات", Courses()),
-          _buildMenuItem(context, "أكثر المستخدمين نشاطًا", ActiveUsers()),
-          _buildMenuItem(context, "الفيد باك", FeedbackPage()),
-          _buildMenuItem(context, "المنح", GrantsPage()),
-          _buildMenuItem(context, "الاشعارات", Notifications()),
-          _buildMenuItem(context, "الرسائل", ChatScreen()),
-        ],
-      ),
+                    });
+                  }
+                  else{
+
+                  }
+
+              },
+            ),
+          ] ,
+        );
+      },
     );
   }
 
-  Widget _buildMenuItem(BuildContext context, String title, Widget page) {
-    return ListTile(
-      title: Text(
-        title,
-        style: TextStyle(color: Colors.white54),
-      ),
-      onTap: () {
-        if (page is WelcomeScreen) {
-          TokenController tokenController=TokenController();
-          tokenController.logout();
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => page),(route) => false,);
-        }
-        else{
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => page),
-          );
-        }},
-    );
-  }
 
 
   Widget _buildMainContent(BuildContext context) {
@@ -387,7 +453,7 @@ class _CoursesState extends State<Courses> {
       backgroundColor: Color(0xFF2B2B2B),
       body: Row(
         children: [
-          _buildSidebar(context),
+          Sidebar(),
           Expanded(child: _buildMainContent(context)),
         ],
       ),

@@ -93,13 +93,13 @@ class _AddideaScreenState extends State<AddideaScreen> {
       widget.ideaId.toString()
 
     );
-    if (result != null ) {
+    if (result != null) {
       print("Idea updated successfully!");
-      _showSuccessDialog('updated');
+      _showSuccessDialog();
     } else {
-      print("Failed to update idea: ${result?['message']}");
+      // print("Failed to add idea: ${result?['message']}");
       Fluttertoast.showToast(
-        msg: "Failed to update idea: ${result?['message']}",
+        msg: "Failed to update idea",
         toastLength: Toast.LENGTH_LONG,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.red,
@@ -119,7 +119,7 @@ class _AddideaScreenState extends State<AddideaScreen> {
 
     if (result != null && result['success']) {
       print("Idea added successfully!");
-      _showSuccessDialog('added');
+      _showSuccessDialog();
     } else {
       print("Failed to add idea: ${result?['message']}");
       Fluttertoast.showToast(
@@ -133,12 +133,12 @@ class _AddideaScreenState extends State<AddideaScreen> {
     }
   }
 
-  void _showSuccessDialog(String status) {
+  void _showSuccessDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text("Success"),
-        content: Text("Your idea has been $status successfully."),
+        content: Text("Your idea has been added successfully."),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -213,7 +213,7 @@ class _AddideaScreenState extends State<AddideaScreen> {
                                 } else {
                                   addIdea();
                                 }
-                                Navigator.pop(context, true); // Go back to the previous page
+                                Navigator.pop(context); // Go back to the previous page
                               },
                               child: Text('حفظ '),
                             ),

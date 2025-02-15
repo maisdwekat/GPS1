@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ggg_hhh/Controllers/token_controller.dart';
+import '../../Widget/admin/sidebar.dart';
 import '../Welcome/welcome_screen.dart';
 import '../investor/homepageinvestor/HomePageScreeninvestor.dart';
 import '../users/homepageUsers/HomePageScreenUsers.dart';
@@ -22,57 +23,10 @@ class DashboardPage extends StatelessWidget {
       backgroundColor: Color(0xFF2B2B2B), // تغيير لون الخلفية هنا
       body: Row(
         children: [
-          _buildSidebar(context),
+          Sidebar(),
           Expanded(child: _buildMainContent(context)),
         ],
       ),
-    );
-  }
-
-  Widget _buildSidebar(BuildContext context) {
-    return Container(
-      width: 250,
-      color: Color(0xFF4A4A4A),
-      child: Column(
-        children: [
-          SizedBox(height: 70),
-          _buildMenuItem(context, "لوحة التحكم", DashboardPage()),
-          _buildMenuItem(context, "المستخدمون", UsersPage()),
-          _buildMenuItem(context, "المشاريع", ProjectsPage()),
-          _buildMenuItem(context, "الأفكار", IdeasPage()),
-          _buildMenuItem(context, "الدورات", Courses()),
-          _buildMenuItem(context, "أكثر المستخدمين نشاطًا", ActiveUsers()),
-          _buildMenuItem(context, "الفيد باك", FeedbackPage()),
-          _buildMenuItem(context, "المنح", Grantpage()),
-          _buildMenuItem(context, "الاشعارات", Notifications()),
-          _buildMenuItem(context, "الرسائل", chat()),
-          _buildMenuItem(context, "تسجيل خروج", WelcomeScreen()),
-
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMenuItem(BuildContext context, String title, Widget page) {
-    return ListTile(
-      title: Text(
-        title,
-        style: TextStyle(color: Colors.white54),
-      ),
-      onTap: () {
-        if (page is WelcomeScreen) {
-          TokenController tokenController=TokenController();
-          tokenController.logout();
-          Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => page),(route) => false,);
-        }
-        else{
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => page),
-        );
-      }},
     );
   }
 
@@ -228,6 +182,9 @@ class _UserRequestTableState extends State<UserRequestTable> {
   List<Map<String, String>> requests = [
     {'user': 'noor', 'type': 'نشر فكرة', 'email': 'noor@gmail.com'},
     {'user': 'samer', 'type': 'نشر مشروع', 'email': 'samer@gmail.com'},
+    {'user': 'Louie', 'type': 'نشر مشروع', 'email': 'Louie@gmail.com'},
+    {'user': 'Mira', 'type': 'نشر مشروع', 'email': 'Mira@gmail.com'},
+    {'user': 'mai', 'type': 'نشر فكرة', 'email': 'mai@gmail.com'},
   ];
 
   @override

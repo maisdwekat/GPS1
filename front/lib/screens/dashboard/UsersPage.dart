@@ -181,7 +181,7 @@ class _UsersPageState extends State<UsersPage> {
           DataColumn(label: Text('اسم المستخدم', style: TextStyle(color: Colors.white))),
           DataColumn(label: Text('البريد الإلكتروني', style: TextStyle(color: Colors.white))),
           DataColumn(label: Text('الفئة', style: TextStyle(color: Colors.white))),
-          DataColumn(label: Text('الفئة', style: TextStyle(color: Colors.white))),
+          DataColumn(label: Text('تاريخ اخر نشاط', style: TextStyle(color: Colors.white))),
 
         ],
         rows: users.map((user) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../Controllers/ProjectController.dart';
+import '../../Controllers/date_controller.dart';
 import '../../Controllers/token_controller.dart';
 import '../Welcome/welcome_screen.dart';
 import 'ActiveUsersTable.dart';
@@ -185,7 +186,8 @@ class _ProjectsPageState extends State<ProjectsPage> {
             DataCell(Text(project['title']!, style: TextStyle(color: Colors.white))),
             DataCell(Text(project['name']!, style: TextStyle(color: Colors.white))),
             DataCell(Text(project['email']!, style: TextStyle(color: Colors.white))),
-            DataCell(Text(project['date']!, style: TextStyle(color: Colors.white))),
+            DataCell(Text(ConvertDateAndFormate (project['date']! ), style: TextStyle(color: Colors.white))),
+
             DataCell(Row(
               children: [
                 IconButton(
