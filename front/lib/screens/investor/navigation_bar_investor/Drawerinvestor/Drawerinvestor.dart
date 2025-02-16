@@ -4,6 +4,7 @@ import 'package:ggg_hhh/Controllers/token_controller.dart';
 import '../../../Welcome/welcome_screen.dart';
 import '../MyInformation/MyAccount.dart';
 import '../MyInformation/MyInvestments.dart';
+import '../MyInformation/calendar.dart';
 
 class Drawerinvestor extends StatelessWidget {
   final GlobalKey<ScaffoldState> scaffoldKey;
@@ -30,6 +31,12 @@ class Drawerinvestor extends StatelessWidget {
             title: const Text('استثماراتي'),
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => MyInvestmentsScreen()));
+            },
+          ),
+          ListTile(
+            title: const Text('التقويم'),
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) =>  Calender()));
             },
           ),
           ListTile(

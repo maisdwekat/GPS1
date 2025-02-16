@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:ggg_hhh/Controllers/ProjectController.dart';
+import 'package:ggg_hhh/Controllers/token_controller.dart';
 import 'package:ggg_hhh/Widget/bmc_widget.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import '../../../../../Controllers/date_controller.dart';
 import '../../../../../Investments/InvestmentModel.dart';
+import '../../../../../Widget/rating_widget.dart';
 import '../../../../ChatForInquiries/ChatForInquiries.dart';
 import '../../../../basic/footer.dart';
 import '../../../../basic/header.dart';
@@ -23,15 +26,31 @@ class ProjectInformationScreen extends StatefulWidget {
 }
 
 class _ProjectInformationScreenState extends State<ProjectInformationScreen> {
+  TokenController tokenController = TokenController();
+
   Widget? _selectedContent; // تغيير إلى نوع Widget?
   ProjectController projectController = ProjectController();
   dynamic project;
-  int _selectedStar = 0; // لتحفظ رقم النجمة المحددة
+  double? _selectedStar ; // لتحفظ رقم النجمة المحددة
+  String? userId;
+  getId() async {
+    String? token = await tokenController.getToken();
+    Map<String, dynamic> decodedToken = JwtDecoder.decode(token!);
+    userId = decodedToken['id'];
 
+  }
 
   getproject() async {
+    List <dynamic> rattingList;
+
     project = await projectController.getSpecificProject(widget.projectId);
+    if(project!=null){
+      rattingList=project['ratings'] as List;
+      setState(() {});
+      _selectedStar=rattingList.where((element) => element['investor']==userId).first['rating'] as double?;
+    }
     setState(() {});
+
   }
 
   void _updateContent(Widget content) {
@@ -44,6 +63,7 @@ class _ProjectInformationScreenState extends State<ProjectInformationScreen> {
 
   @override
   void initState() {
+    getId();
     getproject();
     super.initState();
   }
@@ -477,31 +497,12 @@ class _ProjectInformationScreenState extends State<ProjectInformationScreen> {
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 15),
-         widget.isInvestor? _buildRatingStars():SizedBox(), // إضافة النجوم هنا
+         widget.isInvestor? RatingWidget.toInvestor(selectedStar: _selectedStar??0,projectId: widget.projectId,):SizedBox(), // إضافة النجوم هنا
 
         ],
       ),
     );
   }
 
-  Widget _buildRatingStars() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(5, (index) {
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              _selectedStar = index + 1; // تعيين رقم النجمة المحددة
-            });
-          },
-          child: Icon(
-            Icons.star,
-            color: index < _selectedStar ? Colors.orange : Colors.grey[350],
-            // تغيير اللون حسب التحديد
-            size: 30,
-          ),
-        );
-      }),
-    );
-  }
+
 }

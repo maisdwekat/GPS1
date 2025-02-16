@@ -34,6 +34,9 @@ class _HomePageScreeninvestorState extends State<HomePageScreeninvestor> {
   Future<void> fetchLatestCourses() async {
     _projects=await projectController.getAllProjects();
     _ideas=await ideaController.getAllIdeas();
+    setState(() {
+
+    });
   }
 
   @override

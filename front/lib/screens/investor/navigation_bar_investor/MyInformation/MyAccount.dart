@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../Widget/investor/investorHeader.dart';
+import '../../../../Widget/user_information_header.dart';
 import '../../homepageinvestor/HomePageScreeninvestor.dart';
 import 'MyInvestments.dart';
 
@@ -82,73 +84,8 @@ class _ProfileScreeninvestorState extends State<ProfileScreeninvestor> {
               color: Color(0xFF0A1D47),
               height: 30,
             ),
-            Container(
-              color: Colors.grey[200],
-              padding: EdgeInsets.all(10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    'اسم الشخص',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(width: 10),
-                  GestureDetector(
-                    onTap: _pickImage,
-                    child: Stack(
-                      alignment: Alignment.bottomRight,
-                      children: [
-                        CircleAvatar(
-                          radius: 80,
-                          backgroundImage: _profileImage.isNotEmpty
-                              ? FileImage(File(_profileImage))
-                              : const AssetImage('assets/images/defaultpfp.jpg') as ImageProvider,
-                          child: _profileImage.isEmpty
-                              ? const Icon(Icons.camera_alt, size: 30, color: Colors.grey)
-                              : null,
-                        ),
-                        const Icon(Icons.edit, color: Color(0xFF0A1D47)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              height: 2,
-              color: Color(0xFF0A1D47),
-            ),
-            Container(
-              color: Colors.grey[200],
-              height: 50,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => MyInvestmentsScreen()),
-                      );
-                    },
-                    child: _buildMenuItem('استثماراتي', null),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => ProfileScreeninvestor()),
-                      );
-                    },
-                    child: _buildMenuItem('حسابي', null),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              height: 2,
-              color: Color(0xFF0A1D47),
-            ),
+            UserInformationHeader(),
+            Investorheader(),
             SizedBox(height: 40),
             Container(
               alignment: Alignment.centerRight,
@@ -387,22 +324,7 @@ class _ProfileScreeninvestorState extends State<ProfileScreeninvestor> {
     );
   }
 
-  Widget _buildMenuItem(String title, IconData? icon) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: Colors.transparent,
-      ),
-      child: Row(
-        children: [
-          if (icon != null) Icon(icon, color: Color(0xFF001F3F), size: 16),
-          if (icon != null) SizedBox(width: 4),
-          Text(title, style: TextStyle(color: Color(0xFF001F3F))),
-        ],
-      ),
-    );
-  }
+
 }
 
 // تأكد من إضافة صفحة EditPasswordPage في مشروعك

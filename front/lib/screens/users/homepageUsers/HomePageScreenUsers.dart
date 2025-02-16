@@ -49,6 +49,9 @@ class _homepagescreenState extends State<homepagescreen> {
     _ideas=await ideaController.getAllIdeas();
     print(_ideas);
     print('_courses');
+    setState(() {
+
+    });
   }
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();

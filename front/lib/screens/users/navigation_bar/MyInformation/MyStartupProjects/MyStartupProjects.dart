@@ -349,10 +349,12 @@ class _MyStartupProjectsScreenState extends State<MyStartupProjectsScreen> {
                         ),
                         SizedBox(height: 10),
                         Text(
-                          _projects[index]['status'] ?? 'حالة المشروع',
+                          _projects[index]['isPublic'] ? 'عام': 'خاص',
+
                           style: TextStyle(fontSize: 14, color: Colors.green),
                           textAlign: TextAlign.center,
                         ),
+
                       ],
                     ),
                   );

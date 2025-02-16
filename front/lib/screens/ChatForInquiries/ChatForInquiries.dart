@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:ggg_hhh/Controllers/users_chat_controller.dart';
-import 'package:intl/intl.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 class ChatForInquiriesScreen extends StatefulWidget {
   const ChatForInquiriesScreen({super.key, required this.id});

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ggg_hhh/Controllers/date_controller.dart';
 import 'package:ggg_hhh/Widget/bmc_widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -9,7 +10,9 @@ import '../../../../../Investments/UserInvestmentRequests.dart';
 import '../../../../../Widget/DeletionAndModificationRequestsWidget.dart';
 import '../../../../../Widget/ExistinginvestorsWidget.dart';
 import '../../../../../Widget/InvestmentRequests_widget.dart';
+import '../../../../../Widget/charts_widget.dart';
 import '../../../../../Widget/notes_widget.dart';
+import '../../../../../Widget/rating_widget.dart';
 import '../../../../../Widget/user_information_header.dart';
 import '../../../../ChatForInquiries/ChatForInquiries.dart';
 import '../../../../../Investments/Request_form.dart';
@@ -23,7 +26,7 @@ class PreviewProjectScreen extends StatefulWidget {
   _PreviewProjectScreenState createState() => _PreviewProjectScreenState();
   final String projectId;
 
-   PreviewProjectScreen({super.key, required this.projectId});
+  PreviewProjectScreen({super.key, required this.projectId});
 }
 
 class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
@@ -39,6 +42,7 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
   final TextEditingController dateController = TextEditingController();
 
   String? creationDate; // لتخزين تاريخ الإنشاء (يمكن أن يكون نصًا)
+  var data;
   String? isoDate; // لتخزين التاريخ بالتنسيق المطلوب
   DateTime dateTime = DateTime.now();
   final TextEditingController shortDescriptionController =
@@ -50,11 +54,12 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
   String? imagePath; // Path of the selected image
   // Uint8List imageBytes = Uint8List(0); // Bytes of the selected image
   // http.MultipartFile? imageFile; // Multipart file for the image
-
+TokenController tokenController = TokenController();
 
   @override
   void initState() {
     super.initState();
+    tokenController.getToken();
     _selectedContent = Container();
     getdata();
   }
@@ -62,7 +67,7 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
   final TokenController token = TokenController();
 
   getdata() async {
-    var data = await ProjectController().getprojectById(widget.projectId!);
+     data = await ProjectController().getSpecificProject(widget.projectId!);
     print('it must get one project');
 
     setState(() {
@@ -80,6 +85,17 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
     });
     print(data);
     print('it must get one project');
+  }
+
+
+  Future<void> _pickImage() async {
+    final ImagePicker _picker = ImagePicker();
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _profileImage = image.path;
+      });
+    }
   }
 
   void _updateContent(Widget content) {
@@ -100,7 +116,7 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
               child: Container(
                 width: 400,
                 height: 600, // يمكنك تعديل الحجم كما تحتاج
-                child: ChatForInquiriesScreen(id: '',), // استبدل هذا بالمحتوى الخاص بك
+                child: ChatForInquiriesScreen(id: data['_id'],), // استبدل هذا بالمحتوى الخاص بك
               ),
             ),
           ],
@@ -111,7 +127,7 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return data==null? CircularProgressIndicator(): Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFF0A1D47),
         leading: IconButton(
@@ -142,6 +158,7 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
       height: 30,
     );
   }
+
 
 
   Widget _buildNavigationBar() {
@@ -206,13 +223,12 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            'عنوان المشروع الرئيسي',
+            '',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             textAlign: TextAlign.right,
           ),
           SizedBox(height: 20),
           _buildProjectActions(),
-          SizedBox(height: 20),
           // عرض المحتوى المحدد بناءً على الضغط
           if (_selectedContent != null) ...[
             _selectedContent!, // استخدام ! لأننا نعرف أنه ليس null هنا
@@ -223,35 +239,6 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
     );
   }
 
-  Widget _buildProjectActions() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        _buildActionItem('طلبات الحذف والتعديل ', () {
-          _updateContent(_buildDeletionAndModificationRequestsContent());
-        }),
-        _buildActionItem('المستثمرين الحاليين', () {
-          _updateContent(_buildExistinginvestorsContent()); // تعيين كـ Widget
-        }),
-        _buildActionItem('طلبات الاستثمار', () {
-          _updateContent(_buildInvestmentRequestsContent()); // تعيين كـ Widget
-        }),
-        _buildActionItem('الملاحظات', () {
-          _updateContent(_buildProjectNotesContent()); // تعيين كـ Widget
-        }),
-        _buildActionItem('نموذج العمل التجاري', () {
-          _updateContent(
-              _buildBusinessModelContent(context)); // تعيين كـ Widget
-        }),
-        _buildActionItem('سير المشروع', () {
-          _updateContent(_buildProjectProgressContent()); // تعيين كـ Widget
-        }),
-        _buildActionItem('حول', () {
-          _updateContent(_buildAboutContent()); // تعيين كـ Widget
-        }),
-      ],
-    );
-  }
 
 ////////////////////////////////////////////////////
 
@@ -261,7 +248,7 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          _buildAboutSection('صاحب المشروع', 'أحمد محمد', 20, 18),
+          _buildAboutSection('صاحب المشروع', data['name'], 20, 18),
           _buildAboutSection(
             'البريد الإلكتروني',
             GestureDetector(
@@ -269,7 +256,7 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
                 _showChatDialog(context);
               },
               child: Text(
-                'ahmed@example.com',
+                data['email'],
                 style: TextStyle(
                     fontSize: 16,
                     color: Colors.blue,
@@ -284,7 +271,7 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
               GestureDetector(
                 onTap: () {},
                 child: Text(
-                  'www.example.com',
+                  data['website'],
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.blue,
@@ -294,12 +281,10 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
               ),
               16,
               14),
-          _buildProgressSection('تاريخ الإنشاء', '2024', 20, 18),
+          _buildProgressSection('تاريخ الإنشاء', ConvertDateAndFormate(data['createdAt']) ,20, 18),
           _buildAboutSection(
               'نبذة عن المشروع',
-              'يطمح المشروع إلى تحقيق نتائج ملموسة تسهم في تحسين العمليات المختلفة...',
-              16,
-              14),
+              data['description'], 16,14),
         ],
       ),
     );
@@ -363,8 +348,17 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
         children: [
           SizedBox(height: 10),
           _buildProgressSectionWithProgress(
-              'المرحلة الحالية', 'مرحلة التحقق والتخطيط', 20, 18, 0.4),
+              'المرحلة الحالية', data['current_stage'], 20, 18, 0.4),
+          ElevatedButton(
+            onPressed: () {
+            },
+            child: Text('اكمل مرحلتك'),
+            style: ElevatedButton.styleFrom(
+              minimumSize: Size(150, 50), // تحديد الطول والعرض للزر
+            ),
+          ),
         ],
+
       ),
     );
   }
@@ -460,7 +454,7 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
           Container(
             width: 800,
             height: 400,
-            child: NotesWidget(),
+            child: NotesWidget(id:widget.projectId ,),
           ),
           SizedBox(height: 10), // إضافة مسافة بين الصورة والزر
         ],
@@ -506,8 +500,75 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
       ),
     );
   }
+  Widget _buildProjectActions() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
 
+      children: [
+        _buildActionItem(' مخططات', () {
+          _updateContent(_buildcharts());
+        }),
+        _buildActionItem('طلبات الحذف والتعديل ', () {
+          _updateContent(_buildDeletionAndModificationRequestsContent());
+        }),
+        _buildActionItem('المستثمرين الحاليين', () {
+          _updateContent(_buildExistinginvestorsContent()); // تعيين كـ Widget
+        }),
+        _buildActionItem('طلبات الاستثمار', () {
+          _updateContent(_buildInvestmentRequestsContent()); // تعيين كـ Widget
+        }),
+        _buildActionItem('الملاحظات', () {
+          _updateContent(_buildProjectNotesContent()); // تعيين كـ Widget
+        }),
+        _buildActionItem('نموذج العمل التجاري', () {
+          _updateContent(
+              _buildBusinessModelContent(context)); // تعيين كـ Widget
+        }),
+        _buildActionItem('سير المشروع', () {
+          _updateContent(_buildProjectProgressContent()); // تعيين كـ Widget
+        }),
+        _buildActionItem('حول', () {
+          _updateContent(_buildAboutContent()); // تعيين كـ Widget
+        }),
+      ],
+    );
+  }
+  _buildcharts(){
+    return Container(
+      padding: EdgeInsets.all(10),
+      child: Column(
+        // استخدم عمود لمحاذاة العناصر رأسياً
+        mainAxisAlignment: MainAxisAlignment.end, // لمحاذاة المحتوى إلى الأسفل
+        children: [
+          Container(
+            width: 800,
+            height: 400,
+            child: ChartsWidget(),
+          ),
+          SizedBox(height: 10), // إضافة مسافة بين الصورة والزر
+        ],
+      ),
+    );
+  }
 ///////////////////////////////////////////
+
+  Widget _buildActionItem(String title, Function action) {
+    return GestureDetector(
+      onTap: () {
+        action(); // استدعاء الدالة
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+        child: Text(
+          title,
+          style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF001F3F)),
+        ),
+      ),
+    );
+  }
 
   Widget _buildDeletionAndModificationRequestsContent() {
     return Container(
@@ -528,23 +589,7 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
   }
 
 ////////////////////////////////////////////////////////
-  Widget _buildActionItem(String title, Function action) {
-    return GestureDetector(
-      onTap: () {
-        action(); // استدعاء الدالة
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: Text(
-          title,
-          style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF001F3F)),
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildProjectSummary() {
     return Container(
@@ -573,20 +618,20 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               image: DecorationImage(
-                image: AssetImage('assets/images/p1 (2).jpeg'),
+                image: NetworkImage(data['image']),
                 fit: BoxFit.cover,
               ),
             ),
           ),
           SizedBox(height: 15),
           Text(
-            'اسم المشروع',
+            data['title'],
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 10),
           Text(
-            'مجال المشروع',
+            data['description'],
             style: TextStyle(fontSize: 16, color: Colors.grey),
             textAlign: TextAlign.center,
           ),
@@ -597,24 +642,13 @@ class _PreviewProjectScreenState extends State<PreviewProjectScreen> {
             color: Color(0xFFE0E0E0),
           ),
           SizedBox(height: 15),
-
           Text(
-            'وصف مختصر',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 10),
-          Container(
-            width: 150,
-            height: 2,
-            color: Color(0xFFE0E0E0),
-          ),
-
-          Text(
-            'حالة المشروع',
+            data['isPublic']?"عام":"خاص",
             style: TextStyle(fontSize: 14, color: Colors.green),
             textAlign: TextAlign.center,
           ),
+          SizedBox(height: 15,),
+          RatingWidget(selectedStar: data['averageRating'],),
         ],
       ),
     );

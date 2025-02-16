@@ -526,33 +526,46 @@ class ProjectController extends GetxController {
       );
     }
   }
-
 //addNote
   Future<Map<String, dynamic>> addNote(
-      String projectId, Map<String, dynamic> noteData, String token) async {
+      String projectId, Map<String, dynamic> noteData) async {
+    final savedToken = await tokenController.getToken(); // تأكد من وجود دالة _getToken
+    print("Saved Token: $savedToken");
+    if (savedToken == null || savedToken.isEmpty) {
+      print("Error: Token is null or empty");
+    }
+    String tokenWithPrefix = 'token__$savedToken';
     final url = Uri.parse('$baseUrl/addNote/$projectId');
+    print('Making POST request to: $url');
     try {
       final response = await http.post(
         url,
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer $token", // Include the token here
+          "token": tokenWithPrefix, // Include the token here
         },
         body: jsonEncode(noteData),
       );
 
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      final message = jsonDecode(response.body)['message'] ?? 'Unknown error occurred';
+      print('Response message: $message');
       if (response.statusCode == 200) {
+        print('Success: Note added successfully');
         return {
           'success': true,
-          'message': jsonDecode(response.body)['message']
+          'message': message
         };
       } else {
+        print('Error response: ${jsonDecode(response.body)['message']}');
         return {
           'success': false,
-          'message': jsonDecode(response.body)['message']
+          'message': message
         };
       }
     } catch (e) {
+      print('Exception caught: ${e.toString()}');
       Get.snackbar(
         'Error',
         'Could not add the note: ${e.toString()}',
@@ -565,18 +578,24 @@ class ProjectController extends GetxController {
   }
 
   //deleteNote
-  Future<void> deleteNote(String projectId, String noteId, String token) async {
+  Future<void> deleteNote(String projectId, String noteId) async {
+    final savedToken = await tokenController.getToken(); // تأكد من وجود دالة _getToken
+    print("Saved Token: $savedToken");
+    if (savedToken == null || savedToken.isEmpty) {
+      print("Error: Token is null or empty");
+    }
+    String tokenWithPrefix = 'token__$savedToken';
     final url = Uri.parse('$baseUrl/deleteNote/$projectId/$noteId');
     try {
       final response = await http.delete(
         url,
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer $token", // Include the token here
+          "token": tokenWithPrefix, // Include the token here
         },
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode < 299) {
         Get.snackbar(
           'Success',
           'Note deleted successfully',
@@ -600,14 +619,20 @@ class ProjectController extends GetxController {
 
   //updateNote
   Future<Map<String, dynamic>> updateNote(String projectId, String noteId,
-      Map<String, dynamic> noteData, String token) async {
+      Map<String, dynamic> noteData) async {
+    final savedToken = await tokenController.getToken(); // تأكد من وجود دالة _getToken
+    print("Saved Token: $savedToken");
+    if (savedToken == null || savedToken.isEmpty) {
+      print("Error: Token is null or empty");
+    }
+    String tokenWithPrefix = 'token__$savedToken';
     final url = Uri.parse('$baseUrl/updateNote/$projectId/$noteId');
     try {
       final response = await http.put(
         url,
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer $token", // Include the token here
+          "token": tokenWithPrefix, // Include the token here
         },
         body: jsonEncode(noteData),
       );
@@ -636,20 +661,31 @@ class ProjectController extends GetxController {
   }
 
   //getNotes
-  Future<List<dynamic>> getNotes(String projectId, String token) async {
+  Future<List<dynamic>> getNotes(String projectId) async {
+    print("getAllNotesForUser() called");
+    print("widget.projectId: ${projectId}");
+    final savedToken = await tokenController.getToken(); // تأكد من وجود دالة _getToken
+    if (savedToken == null || savedToken.isEmpty) {
+      print("Error: Token is null or empty");
+    }
+    String tokenWithPrefix = 'token__$savedToken';
     final url = Uri.parse('$baseUrl/getNotes/$projectId');
+    print("Requesting: $url");
+
     try {
       final response = await http.get(
         url,
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer $token", // Include the token here
+          "token": tokenWithPrefix, // Include the token here
         },
       );
-
+      print("Sent Request to get Note");
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
       if (response.statusCode == 200) {
-        List<dynamic> notes = jsonDecode(response.body);
-        return notes; // Return the list of notes
+        List<dynamic> notesList = jsonDecode(response.body);
+        return notesList; // تحويل البيانات إلى List<Map<String, dynamic>>
       } else {
         throw Exception('Failed to load notes');
       }
@@ -661,7 +697,7 @@ class ProjectController extends GetxController {
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
-      return []; // Return an empty list in case of an error
+      return []; // إعادة قائمة فارغة عند حدوث خطأ
     }
   }
 
@@ -845,6 +881,45 @@ class ProjectController extends GetxController {
       print('Error: $error'); // طباعة أي خطأ قد يحدث
       return []; // أو معالجة الخطأ حسب الحاجة
     }
+  }
+  Future<dynamic> addRatting(String projectId, double rate) async {
+    final savedToken = await tokenController.getToken();
+    if (savedToken == null || savedToken.isEmpty) {
+      print("Error: Token is null or empty");
+      return {'success': false, 'message': "Authentication token is missing"};
+    }
+    String tokenWithPrefix = 'token__$savedToken';
+    print("token: ${tokenWithPrefix}");
+
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/rate/$projectId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'token': tokenWithPrefix,
+        },
+        body: json.encode({
+          'rating': rate
+        }),
+      );
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+      final responseData = json.decode(response.body);
+
+      if (response.statusCode == 200 && responseData.containsKey('saveIdea')) {
+        return {'success': true, 'message': "Idea added successfully!"};
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? "Failed to add idea"
+        };
+      }
+    } catch (error) {
+      print('Error: $error');
+      return {'success': false, 'message': "An error occurred"};
+    }
+    return null;
+
   }
 
 

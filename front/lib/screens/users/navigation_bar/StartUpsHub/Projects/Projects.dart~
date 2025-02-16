@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../Controllers/ProjectController.dart';
+import '../../../../../Widget/rating_widget.dart';
 import '../../../../basic/footer.dart';
 import '../../../../basic/header.dart';
 import '../../../../investor/navigation_bar_investor/Drawerinvestor/Drawerinvestor.dart';
@@ -405,16 +406,28 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ProjectInformationScreen(projectId: project['_id'],)),
-              );
+              if(widget.isInvestor){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ProjectInformationScreen.toInvestor(projectId: project['_id'],)),
+                );
+              }
+              else{
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ProjectInformationScreen(projectId: project['_id'],)),
+                );
+              }
+
             },
             child: Text(widget.isInvestor?'تواصل الان':'المزيد من المعلومات'),
             style: ElevatedButton.styleFrom(
               minimumSize: const Size(100, 36),
             ),
           ),
+          SizedBox(height: 8),
+          RatingWidget(selectedStar:project['averageRating']as double ),
+
         ],
       ),
     );

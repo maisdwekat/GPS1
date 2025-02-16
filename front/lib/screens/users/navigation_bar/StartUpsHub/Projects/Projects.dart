@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../Controllers/ProjectController.dart';
+import '../../../../../Widget/rating_widget.dart';
 import '../../../../basic/footer.dart';
 import '../../../../basic/header.dart';
 import '../../../../investor/navigation_bar_investor/Drawerinvestor/Drawerinvestor.dart';
@@ -424,6 +425,9 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
               minimumSize: const Size(100, 36),
             ),
           ),
+          SizedBox(height: 15),
+          RatingWidget(selectedStar:project['averageRating']as double ),
+
         ],
       ),
     );

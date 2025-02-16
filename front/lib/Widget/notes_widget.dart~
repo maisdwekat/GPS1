@@ -5,19 +5,16 @@ import 'package:ggg_hhh/Controllers/date_controller.dart';
 import '../Controllers/ProjectController.dart';
 
 class Note {
-  String id;
   String content;
   DateTime date;
 
   Note({
-    required this.id,
     required this.content,
     required this.date,
   });
 
   factory Note.fromJson(dynamic json) {
     return Note(
-      id: json['_id'],
       content: json['noteText'],
       date: DateTime.parse(json['createdAt']),
     );
@@ -118,9 +115,7 @@ class _NotesWidgetState extends State<NotesWidget> {
               ),
               IconButton(
                 icon: Icon(Icons.delete, color: Colors.orangeAccent),
-                onPressed: () {
-                  _deleteNote(note.id);
-                },
+                onPressed: () {},
               ),
             ],
           ),
@@ -169,7 +164,6 @@ class _NotesWidgetState extends State<NotesWidget> {
       print('Note added successfully');
       setState(() {
         notes!.add(Note(
-          id: DateTime.now().microsecondsSinceEpoch.toString(),
           content: content,
           date: DateTime.now(),
         ));
@@ -223,10 +217,10 @@ class _NotesWidgetState extends State<NotesWidget> {
   // }
 
 
-  void _deleteNote(String noteId) async {
-    _projectController.deleteNote(widget.id, noteId );
+  void _deleteNote(int index) {
+    _projectController.deleteNote(widget.id, notesFormGet[index]['_id']);
     setState(() {
-      notes!.removeWhere((element) => element.id==noteId,);
+      notes.removeWhere((element) => ,);
     });
   }
 

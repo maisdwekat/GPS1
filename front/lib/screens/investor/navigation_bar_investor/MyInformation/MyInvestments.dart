@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../../../Investments/RequestFormUpdate.dart';
+import '../../../../Widget/DeletionAndModificationRequestsWidget.dart';
+import '../../../../Widget/investor/investorHeader.dart';
+import '../../../../Widget/user_information_header.dart';
 import '../../homepageinvestor/HomePageScreeninvestor.dart';
 import 'MyAccount.dart';
 import '../../../../Investments/Request_form.dart';
@@ -13,7 +16,11 @@ class MyInvestmentsScreen extends StatefulWidget {
 
 class _MyInvestmentsScreenState extends State<MyInvestmentsScreen> {
   String _profileImage = ''; // متغير لتخزين مسار الصورة
-
+  final List<String> investors = [
+    'حذف ',
+    ' تعديل ',
+    ' تعديل',
+  ];
   Future<void> _pickImage() async {
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -54,57 +61,10 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen> {
               color: Color(0xFF0A1D47),
               height: 30,
             ),
-            Container(
-              color: Colors.grey[200], // لون رمادي
-              padding: EdgeInsets.all(10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    'اسم الشخص',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(width: 10),
-                  GestureDetector(
-                    onTap: _pickImage,
-                    child: Stack(
-                      alignment: Alignment.bottomRight,
-                      children: [
-                        CircleAvatar(
-                          radius: 80,
-                          backgroundImage: _profileImage.isNotEmpty
-                              ? FileImage(File(_profileImage))
-                              : const AssetImage('assets/images/defaultpfp.jpg') as ImageProvider,
-                          child: _profileImage.isEmpty
-                              ? const Icon(Icons.camera_alt, size: 30, color: Colors.grey)
-                              : null,
-                        ),
-                        const Icon(Icons.edit, color: Color(0xFF0A1D47)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              height: 2,
-              color: Color(0xFF0A1D47),
-            ),
-            Container(
-              color: Colors.grey[200], // لون رمادي
-              height: 50,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildNavButton(context, 'استثماراتي',MyInvestmentsScreen ()),
-                  _buildNavButton(context, 'حسابي', ProfileScreeninvestor()),
-                ],
-              ),
-            ),
-            Container(
-              height: 2,
-              color: Color(0xFF0A1D47),
-            ),
+            UserInformationHeader(),
+
+            Investorheader(),
+
             SizedBox(height: 20),
 
             // عنوان الجداول
@@ -131,7 +91,9 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen> {
             // عرض جدول طلبات الاستثمار
             _buildInvestmentRequestsTable(),
 
-            SizedBox(height: 40), // مساحة فارغة في نهاية الصفحة
+            SizedBox(height: 10),
+            _buildDeletionAndModificationRequestsContent(context),// مساحة فارغة في نهاية الصفحة
+            SizedBox(height: 20),
           ],
         ),
       ),
@@ -322,6 +284,115 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen> {
       ),
     );
   }
+  Widget _buildDeletionAndModificationRequestsContent(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            'طلبات الحذف والتعديل',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 15),
+          Table(
+            border: TableBorder(
+              horizontalInside: BorderSide(color: Colors.grey, width: 1),
+            ),
+            columnWidths: {
+              0: FractionColumnWidth(0.4),
+              1: FractionColumnWidth(0.4),
+              2: FractionColumnWidth(0.2),
+            },
+            children: [
+              _buildHeaderRow(),
+              ...investors.map((name) => _buildInvestorRow(name, context)).toList(),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  TableRow _buildHeaderRow() {
+    return TableRow(
+      children: [
+        Align(
+          alignment: Alignment.center,
+          child: Column(
+            children: [
+              SizedBox(height: 8),
+              Text(
+                'نموذج الطلب',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+            ],
+          ),
+        ),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Column(
+            children: [
+              SizedBox(height: 8),
+              Text(
+                'نوع الطلب ',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  TableRow _buildInvestorRow(String name, BuildContext context) {
+    return TableRow(
+      children: [
+        Align(
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 8),
+              SizedBox(
+                width: 180,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RequestFormScreen(), // استبدل بـ RequestForm()
+                      ),
+                    );
+                  },
+                  child: Text('نموذج الطلب'),
+                ),
+              ),
+              SizedBox(height: 8),
+            ],
+          ),
+        ),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 8),
+              Text(
+                name,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.right,
+              ),
+              SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
 
   Widget _buildButton(String title, VoidCallback onPressed) {
     return Container(
